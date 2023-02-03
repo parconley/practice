@@ -1,3 +1,7 @@
+// Parker Conley
+// 2.3.23
+// This program calculates the volume of a ring.
+
 #include <iostream>
 using namespace std;
 #include <math.h>
