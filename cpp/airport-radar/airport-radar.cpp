@@ -43,6 +43,7 @@ int main() {
 // Displays the Main Calculations Menu and recieves inputs. 
 void ShowMainMenu() {
     int quit = 0;
+    int option_number;
 
     while (!quit)
     {
@@ -55,7 +56,6 @@ void ShowMainMenu() {
         cout << "---------------------------------" << endl;
 
         // Asks user to selection an option by typing the option's number.
-        int option_number;
         cout << endl << "Select an option by typing the option's number: ";
         cin >> option_number;
 
@@ -68,7 +68,7 @@ void ShowMainMenu() {
         } else if (option_number == 4) {
             quit = 1;
         } else {
-            cout << endl << "The number you entered did not match. Please try again.";
+            cout << endl << "The number you entered did not match any of the options. Please try again." << endl;
         }
     }
 }
@@ -116,6 +116,7 @@ void ShowDestination() {
 // Displays the Basic Calculations Menu and recieves inputs.
 void ShowBasicCalculations() {
     int return_to_main_menu = 0;
+    int option_number;
 
     while (!return_to_main_menu) {
         // Displays menu options.
@@ -127,7 +128,6 @@ void ShowBasicCalculations() {
         cout << "---------------------------------" << endl;
 
         // Asks user to selection an option by typing the option's number.
-        int option_number;
         cout << endl << "Select an option by typing the option's number: ";
         cin >> option_number;
 
@@ -140,7 +140,7 @@ void ShowBasicCalculations() {
         } else if (option_number == 4) {
             return_to_main_menu = 1;
         } else {
-            cout << endl << "The number you entered did not match. Please try again.";
+            cout << endl << "The number you entered did not match any of the options. Please try again." << endl;
         }    
     }
 }
