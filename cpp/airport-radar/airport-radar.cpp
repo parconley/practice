@@ -21,12 +21,15 @@ void GetTwoRectPoints(double &x1, double &x2, double &y1, double &y2);
 void GetOnePolarPoint(double &distance, double &angle);
 void GetOneRectPoint(double &x, double &y);
 double GetTimeElapsed();
+double GetDirection();
+double GetSpeed();
 
 // Engineers
 double CalcDistance(double x1, double x2, double y1, double y2);
 void ConvertRectToPolar(double x, double y, double &distance, double &angle);
 void ConvertPolarToRect(double distance, double angle, double &x, double &y);
 double CalcSpeed(double distance1, double distance2, double angle1, double angle2, double time_elapsed);
+void CalcDestination(double distance, double angle, double direction, double speed, double time_elapsed, double &destination_distance, double &destination_angle);
 
 
 int main() {
@@ -70,22 +73,37 @@ void ShowMainMenu() {
     }
 }
 
-
+// Runs the input function to get two pairs of polar coordiantes and a time.
+// Runs the calculate speed function to get the speed traveled between
+// the two pairs of polar coordinates given the time elapsed.
+// Outputs the speed.
 void ShowSpeedAndDirection() {
-    double distance1, distance2, angle1, angle2, time_elapsed, speed;
+    double distance1, distance2, angle1, angle2;
 
     GetTwoPolarPoints(distance1, distance2, angle1, angle2);
 
-    time_elapsed = GetTimeElapsed();
+    double time_elapsed = GetTimeElapsed();
 
-    speed = CalcSpeed(distance1, distance2, angle1, angle2, time_elapsed);
+    double speed = CalcSpeed(distance1, distance2, angle1, angle2, time_elapsed);
 
-    cout << "The object is traveling at a speed of " << speed << " mph" << endl;
+    cout << "The object is traveling at a speed of " << speed << " mph." << endl;
 }
 
+
 void ShowDestination() {
-    // NOT STARTED
-    cout << "ShowDestination()" << endl;
+    double distance, angle;
+    GetOnePolarPoint(distance, angle);
+
+    double direction = GetDirection();
+
+    double speed = GetSpeed();
+
+    double time_elapsed = GetTimeElapsed();
+
+    double destination_distance, destination_angle;
+    CalcDestination(distance, angle, direction, speed, time_elapsed, destination_distance, destination_angle);
+
+    // STOPPED HERE. CREATE OUTPUT AND TEST OUTPUT.
 }
 
 // Displays the Basic Calculations Menu and recieves inputs.
@@ -181,7 +199,7 @@ void GetTwoPolarPoints(double &distance1, double &distance2, double &angle1, dou
     cin >> angle1;
 
     while (!(-360 < angle1 < 360)) {
-        cout << endl << "Answer invalid. Make sure your angle is between -360 and 360 degrees (exclusive)." << endl << endl;
+        cout << endl << "Answer invalid." << endl << "Make sure your angle is between -360 and 360 degrees (exclusive)." << endl << endl;
         cout << "Enter the angle (in degrees): ";
         cin >> angle1;
     }
@@ -199,10 +217,12 @@ void GetTwoPolarPoints(double &distance1, double &distance2, double &angle1, dou
     cin >> angle2;
 
     while (!(-360 < angle2 < 360)) {
-        cout << endl << "Answer invalid. Make sure your angle is between -360 and 360 degrees (exclusive)." << endl << endl;
+        cout << endl << "Answer invalid." << endl << "Make sure your angle is between -360 and 360 degrees (exclusive)." << endl << endl;
         cout << "Enter the angle (in degrees): ";
         cin >> angle2;
     }
+
+    cout << endl;
 }
 
 // Asks user for two pairs of rectangular coordinates.
@@ -241,10 +261,12 @@ void GetOnePolarPoint(double &distance, double &angle) {
     cin >> angle;
 
     while (!(-360 < angle < 360)) {
-        cout << endl << "Answer invalid. Make sure your angle is between -360 and 360 degrees (exclusive)." << endl << endl;
+        cout << endl << "Answer invalid." << endl << "Make sure your angle is between -360 and 360 degrees (exclusive)." << endl << endl;
         cout << "Enter the angle (in degrees): ";
         cin >> angle;
     }
+
+    cout << endl;
 }
 
 // Asks user for one pair of rectangular coordinates.
@@ -267,7 +289,60 @@ double GetTimeElapsed() {
     cout << "Enter the amount of time that elapsed (in hours): ";
     cin >> time_elapsed;
 
+    while (time_elapsed < 0) {
+        cout << "Invalid response. It is impossible to travel backwards in time." << endl << "Please enter a positive number." << endl << endl;
+
+        cout << "Enter the amount of time that elapsed (in hours): ";
+        cin >> time_elapsed;
+    }
+    
+    while (time_elapsed == 0) {
+        cout << "Invalid response. Please enter a positive number." << endl << endl;
+        
+        cout << "Enter the amount of time that elapsed (in hours): ";
+        cin >> time_elapsed;
+    }
+
+    cout << endl;
+
     return time_elapsed;
+}
+
+// Asks user for a direction.
+double GetDirection() {
+    double direction;
+
+    cout << "Enter the direction (in degrees): ";
+    cin >> direction;
+
+    while (!(-360 < direction < 360)) {
+        cout << endl << "Answer invalid." << endl << "Make sure your direction is between -360 and 360 degrees (exclusive)." << endl << endl;
+        cout << "Enter the angle (in degrees): ";
+        cin >> direction;
+    }
+
+    cout << endl;
+
+    return direction;
+}
+
+// Asks user for a speed.
+double GetSpeed() {
+    double speed;
+
+    cout << "Enter the speed (in mph): ";
+    cin >> speed;
+
+    while (speed < 0) {
+        cout << "Invalid response. Speed cannot be negative." << endl << "Please enter a positive number." << endl << endl;
+
+        cout << "Enter the amount of time that elapsed (in hours): ";
+        cin >> speed;
+    }
+
+    cout << endl;
+
+    return speed;
 }
 
 // Engineers
@@ -331,13 +406,55 @@ void ConvertPolarToRect(double distance, double angle, double &x, double &y) {
 // and returns the speed that an object had to travel linearly to get to
 // the first point to the second in the amount of time elapsed.
 double CalcSpeed(double distance1, double distance2, double angle1, double angle2, double time_elapsed) {
+    // Converts polar coordinates to rectangular coordinates
+    // in order to find the difference.
     double x1, x2, y1, y2;
-
     ConvertPolarToRect(distance1, angle1, x1, y1);
     ConvertPolarToRect(distance2, angle2, x2, y2);
 
-    double x_difference = x2 - x1;
-    double y_difference = y2 - y1;
+    // Finds the difference between the x's and the y's.
+    double new_x = x2 - x1;
+    double new_y = y2 - y1;
 
-    // STOPPED HERE
+    // Converts the new pair of rectangular coordinates back to polar coordinates.
+    double new_distance, new_angle;
+    ConvertRectToPolar(new_x, new_y, new_distance, new_angle);
+
+    // Speed is calculated using the new distance variable
+    // found using the above calcuations.
+    double speed = new_distance / time_elapsed;
+
+    return speed;
 }
+
+// Takes one pair of polar coordinates, a direction, a speed, and a time
+// and finds the final destination (in polar coordinates) of a hypothetical object
+// traveling from that point, in that direction, with that speed,
+// during that amount of time.
+void CalcDestination(double distance, double angle, double direction, double speed, double time_elapsed, double &destination_distance, double &destination_angle) {
+    double distance_from_start = speed * time_elapsed;
+
+    // Treating the distance from the starting point and the direction traveled
+    // as a pair of polar coordaintes.
+
+    // Converting the intiial starting point pair of polar coordinates
+    // to rectangular coordinates.
+    double start_x, start_y;
+    ConvertPolarToRect(distance, angle, start_x, start_y);
+
+    // Converting the distance from the starting point and the direction traveled
+    // to rectangular coordinates.
+    double new_x, new_y;
+    ConvertPolarToRect(distance_from_start, direction, new_x, new_y);
+
+    // Adding the two pairs of rectangular coordinates
+    // to get the object's final destination in rectangular coordinates.
+    double destination_x = start_x + new_x;
+    double destination_y = start_y + new_y;
+
+    // Converting the final destination in rectangular coordinates
+    // to the final destination in polar coordinates.
+    ConvertRectToPolar(destination_x, destination_y, destination_distance, destination_angle);
+}
+
+
