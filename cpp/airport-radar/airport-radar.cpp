@@ -89,8 +89,13 @@ void ShowSpeedAndDirection() {
     cout << "The object is traveling at a speed of " << speed << " mph." << endl;
 }
 
-
+// Runs input functions to get a pair of polar coordinates,
+// a direction, a spped, and a time elapsed.
+// Runs the calculate destination function to find
+// a hypothetical objects final destination given the input values.
+// Outputs the final destination point in polar coordinates.
 void ShowDestination() {
+    // Gets inputs from user.
     double distance, angle;
     GetOnePolarPoint(distance, angle);
 
@@ -100,10 +105,12 @@ void ShowDestination() {
 
     double time_elapsed = GetTimeElapsed();
 
+    // Calculates the final desination using the inputs.
     double destination_distance, destination_angle;
     CalcDestination(distance, angle, direction, speed, time_elapsed, destination_distance, destination_angle);
 
-    // STOPPED HERE. CREATE OUTPUT AND TEST OUTPUT.
+    // Outputs the final destination as a pair of polar coordinates.
+    cout << "The object's final destination will be (" << destination_distance << ", " << destination_angle << "\370)." << endl;
 }
 
 // Displays the Basic Calculations Menu and recieves inputs.
@@ -189,8 +196,8 @@ void GetTwoPolarPoints(double &distance1, double &distance2, double &angle1, dou
     cout << "Enter the first distance (in miles): ";
     cin >> distance1;
 
-    while (!(distance1 > 0)) {
-        cout << endl << "Answer invalid. Make sure the distance is positive." << endl << endl;
+    while (!(distance1 >= 0)) {
+        cout << endl << "Answer invalid. Make sure the distance is positive or zero." << endl << endl;
         cout << "Enter the distance (in degrees): ";
         cin >> distance1;
     }
@@ -208,7 +215,7 @@ void GetTwoPolarPoints(double &distance1, double &distance2, double &angle1, dou
     cin >> distance2;
 
     while (!(distance2 > 0)) {
-        cout << endl << "Answer invalid. Make sure the distance is positive." << endl << endl;
+        cout << endl << "Answer invalid. Make sure the distance is positive or zero." << endl << endl;
         cout << "Enter the distance (in degrees): ";
         cin >> distance2;
     }
@@ -251,7 +258,7 @@ void GetOnePolarPoint(double &distance, double &angle) {
     cout << "Enter the distance (in miles): ";
     cin >> distance;
 
-    while (!(distance > 0)) {
+    while (!(distance >= 0)) {
         cout << endl << "Answer invalid. Make sure the distance is positive." << endl << endl;
         cout << "Enter the distance (in degrees): ";
         cin >> distance;
@@ -290,14 +297,14 @@ double GetTimeElapsed() {
     cin >> time_elapsed;
 
     while (time_elapsed < 0) {
-        cout << "Invalid response. It is impossible to travel backwards in time." << endl << "Please enter a positive number." << endl << endl;
+        cout << endl << "Invalid response. It is impossible to travel backwards in time." << endl << "Please enter a positive number." << endl << endl;
 
         cout << "Enter the amount of time that elapsed (in hours): ";
         cin >> time_elapsed;
     }
     
     while (time_elapsed == 0) {
-        cout << "Invalid response. Please enter a positive number." << endl << endl;
+        cout << endl << "Invalid response. Please enter a positive number." << endl << endl;
         
         cout << "Enter the amount of time that elapsed (in hours): ";
         cin >> time_elapsed;
@@ -334,7 +341,7 @@ double GetSpeed() {
     cin >> speed;
 
     while (speed < 0) {
-        cout << "Invalid response. Speed cannot be negative." << endl << "Please enter a positive number." << endl << endl;
+        cout << endl << "Invalid response. Speed cannot be negative." << endl << "Please enter a positive number." << endl << endl;
 
         cout << "Enter the amount of time that elapsed (in hours): ";
         cin >> speed;
