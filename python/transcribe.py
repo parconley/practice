@@ -1,5 +1,4 @@
 import whisper
-import ffmpeg
 
 model = whisper.load_model("base")
 
