@@ -1,4 +1,14 @@
 #lang scheme
-(define List '(2 5 3 9))
+(define (insertFront Lst Item)
+  (cons Item Lst))
 
-(cons 11 List)
+(define (insertEnd Lst Item)
+  (if (null? Lst)
+      (cons Item '())
+      (cons (car Lst)
+            (insertEnd (cdr Lst) Item))))
+
+(insertEnd '(11 1 2) 1)
+
+(define (insertAtPos Lst Item Pos)
+  (if (=))
