@@ -1,10 +1,4 @@
 #lang scheme
-(define List '(1 2))
+(define List '(2 5 3 9))
 
-List
-
-(cons 1 (cons 1 2))
-
-(cons 1 `())
-
-(cons 1 (cons 2 `()))
+(cons 11 List)
