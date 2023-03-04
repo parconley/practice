@@ -7,18 +7,18 @@ using namespace std;
 
 void ShowMainMenu();
 
-void PlainText();
-void Cipher();
-void CipherText();
-void Encode();
-void Decode();
+void PlainText(char plain_text[]);
+void Cipher(char cipher[], char reverse[]);
+void CipherText(char cipher_text[]);
+void Encode(char plain_text[], char cipher[]);
+void Decode(char cipher_text[], char reverse[]);
 
 void GetEntry(char text[]);
 void GetCipher(char cipher[], char reverse[]);
 void GetLine(char buffer[]);
 
 void ScanAndSubstitute(char text[], char cipher[]);
-void ConvertUppercaseToLowercase();
+void ConvertUppercaseToLowercase(char text[]);
 
 int Main() {
     ShowMainMenu();
@@ -30,7 +30,10 @@ void ShowMainMenu() {
     int quit = 0;
     int option_number;
 
-    //Define plain text, cipher, and cipher text here?
+    char plain_text[81];
+    char cipher_text[81];
+    char cipher[26];
+    char reverse[26];
 
     while (!quit)
     {
@@ -49,15 +52,15 @@ void ShowMainMenu() {
         cin >> option_number;
 
         if (option_number == 1) {
-            PlainText();
+            PlainText(plain_text);
         } else if (option_number == 2) {
-            Cipher();
+            Cipher(cipher, reverse);
         } else if (option_number == 3) {
-            CipherText();
+            CipherText(cipher_text);
         } else if (option_number == 4) {
-            Encode();
+            Encode(plain_text, cipher);
         } else if (option_number == 5) {
-            Decode();
+            Decode(cipher_text, reverse);
         } else if (option_number == 6) {
             quit = 1;
         } else {
@@ -67,37 +70,30 @@ void ShowMainMenu() {
 }
 
 // Functions for each menu option.
-void PlainText() {
-    char plain_text[81];
-
+void PlainText(char plain_text[]) {
     cout << endl << "Enter plain text: ";
     GetEntry(plain_text);
     cout << endl << "Plain text: " << plain_text << endl;
 }
 
-void Cipher() {
-    char cipher[26];
-    char reverse[26];
-
+void Cipher(char cipher[], char reverse[]) {
     cout << endl << "Enter cipher: ";
     GetCipher(cipher, reverse);
     cout << endl << "Cipher: " << cipher << endl;
     cout << endl << "Reverse: " << reverse << endl;
 }
 
-void CipherText() {
-    char cipher_text[81];
-
+void CipherText(char cipher_text[]) {
     cout << endl << "Enter cipher text: ";
     GetEntry(cipher_text);
     cout << endl << "Cipher text: " << cipher_text << endl;
 }
 
-void Encode() {
-    
+void Encode(char plain_text[], char cipher[]) {
+
 }
 
-void Decode() {
+void Decode(char cipher_text[], char reverse[]) {
 
 }
 
@@ -111,14 +107,12 @@ void GetCipher(char cipher[], char reverse[]) {
     cin >> cipher;
 
     // Checking to see if there are 26 letters.
-    int repeat_letters = 1;
+    int is_valid_answer = 0;
+    int repeat_letters = 0;
 
-    while (!repeat_letters) {
+    while (is_valid_answer) {
         int i;
-        repeat_letters = 0;
 
-
-        // STOPPED HERE. NEED TO CHECK IF THERE ARE 26 LETTERS AND IF THERE ARE NO REPEAT LETTERS.
         for (i = 0; cipher[i] != '\0'; ++i) {
             int j;
             for (j = i + 1; cipher[j] != '\0'; ++j) {
@@ -128,14 +122,25 @@ void GetCipher(char cipher[], char reverse[]) {
             }
         }
 
-        if (i == 26) {
-            repeat_letters = 0;
-        } else {
+        if (i != 26) {
             cout << endl << "The cipher you entered did not have 26 letters. Please try again." << endl;
             cout << endl << "Enter cipher: ";
             cin >> cipher;
+        } else if (repeat_letters > 0) {
+            cout << endl << "The cipher you entered had repeat letters. Please try again." << endl;
+            cout << endl << "Enter cipher: ";
+            cin >> cipher;
+        } else {
+            is_valid_answer = 1;
         }
-    }    
+    }
+
+    // Creating the reverse cipher. THIS IS NOT COMPLETE.
+    int i;
+
+    for (i = 0; cipher[i] != '\0'; ++i) {
+        reverse[i] = cipher[i];
+    }
 }
 
 void GetLine(char buffer[]) {
@@ -143,6 +148,7 @@ void GetLine(char buffer[]) {
     char c;
 
     cin.ignore();
+    // OR cin.get();
 
     ix = 0;
     c = cin.get();
@@ -157,5 +163,17 @@ void GetLine(char buffer[]) {
 }
 
 void ScanAndSubstitute(char text[], char cipher[]) {
+    
+}
 
+void ConvertUppercaseToLowercase(char text[]) {
+    cout << endl << "Converting uppercase letters to lowercase..." << endl;
+
+    int i;
+
+    for (i = 0; text[i] != '\0'; ++i) {
+        if (text[i] >= 'A' && text[i] <= 'Z') {
+            text[i] = text[i] + 32; // 32 is the difference between uppercase and lowercase letters in ACSII.
+        }
+    }
 }
