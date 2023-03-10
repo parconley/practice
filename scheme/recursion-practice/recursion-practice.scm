@@ -15,5 +15,8 @@
   (if (= exponent 0)
     1
     (if (even? exponent)
-        (expt (PowerFunction base (/ exponent 2)) 2)
-        (* base (expt (PowerFunction base (/ (- exponent 1) 2)) 2)))))
+        (Square (PowerFunction base (/ exponent 2)))
+        (* base (Square (PowerFunction base (/ (- exponent 1) 2)))))))
+
+(define (Square number)
+  (* number number))
