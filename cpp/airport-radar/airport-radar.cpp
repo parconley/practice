@@ -6,8 +6,9 @@
 using namespace std;
 #include <math.h>
 
+void DisplayIntro();
+
 // Customer Service Representatives
-void ShowMainMenu();
 void ShowSpeedAndDirection();
 void ShowDestination();
 void ShowBasicCalculations();
@@ -16,10 +17,8 @@ void ShowRectToPolar();
 void ShowPolarToRect();
 
 // Inputs
-void GetTwoPolarPoints(double &distance1, double &distance2, double &angle1, double &angle2);
-void GetTwoRectPoints(double &x1, double &x2, double &y1, double &y2);
-void GetOnePolarPoint(double &distance, double &angle);
-void GetOneRectPoint(double &x, double &y);
+void GetPolarPoint(double &distance, double &angle);
+void GetRectPoint(double &x, double &y);
 double GetTimeElapsed();
 double GetDirection();
 double GetSpeed();
@@ -28,28 +27,19 @@ double GetSpeed();
 double CalcDistance(double x1, double x2, double y1, double y2);
 void ConvertRectToPolar(double x, double y, double &distance, double &angle);
 void ConvertPolarToRect(double distance, double angle, double &x, double &y);
-double CalcSpeed(double distance1, double distance2, double angle1, double angle2, double time_elapsed);
+void CalcSpeedAndDirection(double distance1, double distance2, double angle1, double angle2, double &travel_angle, double &time_elapsed, double &speed);
 void CalcDestination(double distance, double angle, double direction, double speed, double time_elapsed, double &destination_distance, double &destination_angle);
 
-
 int main() {
-    ShowMainMenu();
+    DisplayIntro();
 
-    return 0;
-}
-
-// Customer Service Representatives
-
-// Displays the Main Calculations Menu and recieves inputs. 
-void ShowMainMenu() {
     int quit = 0;
     int option_number;
 
-    while (!quit)
-    {
+    do {
         // Displays menu options.
         cout << endl << "----------- MAIN MENU -----------" << endl;
-        cout << "(1) Speed and Destination" << endl;
+        cout << "(1) Speed and Direction" << endl;
         cout << "(2) Destination" << endl;
         cout << "(3) Basic Calcuations" << endl;
         cout << "(4) Quit" << endl;
@@ -70,8 +60,21 @@ void ShowMainMenu() {
         } else {
             cout << endl << "The number you entered did not match any of the options. Please try again." << endl;
         }
-    }
+    } while (!quit);
+
+    return 0;
 }
+
+void DisplayIntro() {
+    cout << endl << "This program simulates an airport radar installation which can:" << endl;
+    cout << "1. Calculate the speed and direction of an object." << endl;
+    cout << "2. Calculate the destination of an object." << endl;
+    cout << "3. Calculate the distance between two points." << endl;
+    cout << "4. Convert rectangular coordinates to polar coordinates." << endl;
+    cout << "5. Convert polar coordinates to rectangular coordinates." << endl;
+}
+
+// Customer Service Representatives
 
 // Runs the input function to get two pairs of polar coordiantes and a time.
 // Runs the calculate speed function to get the speed traveled between
@@ -80,13 +83,19 @@ void ShowMainMenu() {
 void ShowSpeedAndDirection() {
     double distance1, distance2, angle1, angle2;
 
-    GetTwoPolarPoints(distance1, distance2, angle1, angle2);
+    // Gets inputs from user.
+    cout << endl << "Enter the first set of polar coordinates." << endl;
+    GetPolarPoint(distance1, angle1);
+    cout << "Now enter the second set of polar coordinates." << endl;
+    GetPolarPoint(distance2, angle2);
 
     double time_elapsed = GetTimeElapsed();
+    double travel_angle; // This is the angle the object is traveling at.
+    double travel_speed; // This is the speed the object is traveling at.
 
-    double speed = CalcSpeed(distance1, distance2, angle1, angle2, time_elapsed);
+    CalcSpeedAndDirection(distance1, distance2, angle1, angle2, travel_angle, time_elapsed, travel_speed);
 
-    cout << "The object is traveling at a speed of " << speed << " mph." << endl;
+    cout << "The object is traveling at a speed of " << travel_speed << " mph at an angle of " << travel_angle << "\370." << endl;
 }
 
 // Runs input functions to get a pair of polar coordinates,
@@ -97,7 +106,7 @@ void ShowSpeedAndDirection() {
 void ShowDestination() {
     // Gets inputs from user.
     double distance, angle;
-    GetOnePolarPoint(distance, angle);
+    GetPolarPoint(distance, angle);
 
     double direction = GetDirection();
 
@@ -110,7 +119,7 @@ void ShowDestination() {
     CalcDestination(distance, angle, direction, speed, time_elapsed, destination_distance, destination_angle);
 
     // Outputs the final destination as a pair of polar coordinates.
-    cout << "The object's final destination will be (" << destination_distance << ", " << destination_angle << "\370)." << endl;
+    cout << "The object's final destination will be (" << destination_distance << " miles, " << destination_angle << "\370)." << endl;
 }
 
 // Displays the Basic Calculations Menu and recieves inputs.
@@ -118,7 +127,7 @@ void ShowBasicCalculations() {
     int return_to_main_menu = 0;
     int option_number;
 
-    while (!return_to_main_menu) {
+    do {
         // Displays menu options.
         cout << endl << "---- BASIC CALCULATIONS MENU ----" << endl;
         cout << "(1) Distance" << endl;
@@ -142,7 +151,7 @@ void ShowBasicCalculations() {
         } else {
             cout << endl << "The number you entered did not match any of the options. Please try again." << endl;
         }    
-    }
+    } while (!return_to_main_menu);
 }
 
 // Runs the input function to get two pairs of rectangular coordaintes.
@@ -152,11 +161,14 @@ void ShowBasicCalculations() {
 void ShowDistance() {
     double x1, x2, y1, y2;
 
-    GetTwoRectPoints(x1, x2, y1, y2);
+    cout << endl << "Enter the first pair of rectangular coordinates." << endl;
+    GetRectPoint(x1, y1);
+    cout << "Now enter the second pair of rectangular coordinates." << endl;
+    GetRectPoint(x2, y2);
 
     double distance = CalcDistance(x1, x2, y1, y2);
 
-    cout << "The distance between points (" << x1 << ", " << y1 << ") and (" << x2 << ", " << y2 << ") is " << distance << " miles." << endl;
+    cout << "The distance between points (" << x1 << " miles, " << y1 << " miles) and (" << x2 << " miles, " << y2 << " miles) is " << distance << " miles." << endl;
 }
 
 // Runs the input function to get one pair of rectangular coordaintes.
@@ -166,11 +178,12 @@ void ShowDistance() {
 void ShowRectToPolar() {
     double x, y, distance, angle;
 
-    GetOneRectPoint(x, y);
+    cout << endl << "Enter a pair of rectangular coordinates." << endl;
+    GetRectPoint(x, y);
 
     ConvertRectToPolar(x, y, distance, angle);
 
-    cout << "Your pair of rectangular coordinates (" << x << ", " << y << ") is equal to" << endl << "(" << distance << ", " << angle << "\370) as polar coordinates." << endl;
+    cout << "Your pair of rectangular coordinates (" << x << " miles, " << y << " miles) is equal to" << endl << "(" << distance << " miles, " << angle << "\370) as polar coordinates." << endl;
 }
 
 // Runs the input function to get one pair of polar coordaintes.
@@ -180,81 +193,18 @@ void ShowRectToPolar() {
 void ShowPolarToRect() {
     double distance, angle, x, y;
 
-    GetOnePolarPoint(distance, angle);
+    cout << endl << "Enter a pair of polar coordinates." << endl;
+    GetPolarPoint(distance, angle);
 
     ConvertPolarToRect(distance, angle, x, y);
 
-    cout << "Your pair of polar coordinates (" << distance << ", " << angle << "\370) is equal to" << endl << "(" << x << ", " << y << ") as rectangular coordinates." << endl;
+    cout << "Your pair of polar coordinates (" << distance << " miles, " << angle << "\370) is equal to" << endl << "(" << x << " miles, " << y << " miles) as rectangular coordinates." << endl;
 }
 
 // Inputs
 
-// Asks user for two pairs of polar coordinates.
-void GetTwoPolarPoints(double &distance1, double &distance2, double &angle1, double &angle2) {
-    cout << endl << "Please enter two pairs of polar coordinates (distance, angle)." << endl << endl;
-
-    cout << "Enter the first distance (in miles): ";
-    cin >> distance1;
-
-    while (!(distance1 >= 0)) {
-        cout << endl << "Answer invalid. Make sure the distance is positive or zero." << endl << endl;
-        cout << "Enter the distance (in degrees): ";
-        cin >> distance1;
-    }
-
-    cout << "Enter the first angle (in degrees): ";
-    cin >> angle1;
-
-    while (!(-360 < angle1 < 360)) {
-        cout << endl << "Answer invalid." << endl << "Make sure your angle is between -360 and 360 degrees (exclusive)." << endl << endl;
-        cout << "Enter the angle (in degrees): ";
-        cin >> angle1;
-    }
-
-    cout << "Enter the second distance (in miles): ";
-    cin >> distance2;
-
-    while (!(distance2 > 0)) {
-        cout << endl << "Answer invalid. Make sure the distance is positive or zero." << endl << endl;
-        cout << "Enter the distance (in degrees): ";
-        cin >> distance2;
-    }
-
-    cout << "Enter the second angle (in degrees): ";
-    cin >> angle2;
-
-    while (!(-360 < angle2 < 360)) {
-        cout << endl << "Answer invalid." << endl << "Make sure your angle is between -360 and 360 degrees (exclusive)." << endl << endl;
-        cout << "Enter the angle (in degrees): ";
-        cin >> angle2;
-    }
-
-    cout << endl;
-}
-
-// Asks user for two pairs of rectangular coordinates.
-void GetTwoRectPoints(double &x1, double &x2, double &y1, double &y2) {
-    cout << endl << "Please enter two pairs of rectangular coordinates." << endl << endl;
-
-    cout << "Enter the x coordinate of the first point (in miles): ";
-    cin >> x1;
-
-    cout << "Enter the y coordinate of the first point (in miles): ";
-    cin >> y1;
-
-    cout << "Enter the x coordinate of the second point (in miles): ";
-    cin >> x2;
-
-    cout << "Enter the y coordinate of the second point (in miles): ";
-    cin >> y2;
-
-    cout << endl;
-}
-
 // Asks user for one pair of polar coordinates.
-void GetOnePolarPoint(double &distance, double &angle) {
-    cout << endl << "Please enter one pair of polar coordinates (distance, angle)." << endl << endl;
-
+void GetPolarPoint(double &distance, double &angle) {
     cout << "Enter the distance (in miles): ";
     cin >> distance;
 
@@ -267,7 +217,7 @@ void GetOnePolarPoint(double &distance, double &angle) {
     cout << "Enter the angle (in degrees): ";
     cin >> angle;
 
-    while (!(-360 < angle < 360)) {
+    while (!(angle > -360 && angle < 360)) {
         cout << endl << "Answer invalid." << endl << "Make sure your angle is between -360 and 360 degrees (exclusive)." << endl << endl;
         cout << "Enter the angle (in degrees): ";
         cin >> angle;
@@ -277,9 +227,7 @@ void GetOnePolarPoint(double &distance, double &angle) {
 }
 
 // Asks user for one pair of rectangular coordinates.
-void GetOneRectPoint(double &x, double &y) {
-    cout << endl << "Please enter one pair rectangular coordinates." << endl << endl;
-
+void GetRectPoint(double &x, double &y) {
     cout << "Enter the x coordinate (in miles): ";
     cin >> x;
 
@@ -296,16 +244,9 @@ double GetTimeElapsed() {
     cout << "Enter the amount of time that elapsed (in hours): ";
     cin >> time_elapsed;
 
-    while (time_elapsed < 0) {
-        cout << endl << "Invalid response. It is impossible to travel backwards in time." << endl << "Please enter a positive number." << endl << endl;
-
-        cout << "Enter the amount of time that elapsed (in hours): ";
-        cin >> time_elapsed;
-    }
-    
-    while (time_elapsed == 0) {
+    while (time_elapsed <= 0) {
         cout << endl << "Invalid response. Please enter a positive number." << endl << endl;
-        
+
         cout << "Enter the amount of time that elapsed (in hours): ";
         cin >> time_elapsed;
     }
@@ -322,7 +263,7 @@ double GetDirection() {
     cout << "Enter the direction (in degrees): ";
     cin >> direction;
 
-    while (!(-360 < direction < 360)) {
+    while (!(direction > -360 && direction < 360)) {
         cout << endl << "Answer invalid." << endl << "Make sure your direction is between -360 and 360 degrees (exclusive)." << endl << endl;
         cout << "Enter the angle (in degrees): ";
         cin >> direction;
@@ -378,7 +319,7 @@ void ConvertRectToPolar(double x, double y, double &distance, double &angle) {
     // or -90 degrees (if y is less than 0).
     // The "else" is the normal converstion formula while also
     // checking for if the x is less than zero. If it is, it adds 180 degrees.
-    const double PI = 3.142159;
+    const double PI = 3.14159;
 
     if (x == 0) {
         if (y >= 0) {
@@ -400,7 +341,7 @@ void ConvertRectToPolar(double x, double y, double &distance, double &angle) {
 // Takes one pair of polar coordinates
 // and converts them to rectangular coordinates
 void ConvertPolarToRect(double distance, double angle, double &x, double &y) {
-    const double PI = 3.142159;
+    const double PI = 3.14159;
 
     // The "angle" variable is angle in degrees (aka direction).
     double angle_in_radians = angle * (PI / 180);
@@ -412,7 +353,7 @@ void ConvertPolarToRect(double distance, double angle, double &x, double &y) {
 // Takes two pairs of polar coordinates and an amount of time elapsed
 // and returns the speed that an object had to travel linearly to get to
 // the first point to the second in the amount of time elapsed.
-double CalcSpeed(double distance1, double distance2, double angle1, double angle2, double time_elapsed) {
+void CalcSpeedAndDirection(double distance1, double distance2, double angle1, double angle2, double &travel_angle, double &time_elapsed, double &speed) {
     // Converts polar coordinates to rectangular coordinates
     // in order to find the difference.
     double x1, x2, y1, y2;
@@ -424,14 +365,12 @@ double CalcSpeed(double distance1, double distance2, double angle1, double angle
     double new_y = y2 - y1;
 
     // Converts the new pair of rectangular coordinates back to polar coordinates.
-    double new_distance, new_angle;
-    ConvertRectToPolar(new_x, new_y, new_distance, new_angle);
+    double travel_distance;
+    ConvertRectToPolar(new_x, new_y, travel_distance, travel_angle);
 
     // Speed is calculated using the new distance variable
     // found using the above calcuations.
-    double speed = new_distance / time_elapsed;
-
-    return speed;
+    speed = travel_distance / time_elapsed;
 }
 
 // Takes one pair of polar coordinates, a direction, a speed, and a time
@@ -463,5 +402,3 @@ void CalcDestination(double distance, double angle, double direction, double spe
     // to the final destination in polar coordinates.
     ConvertRectToPolar(destination_x, destination_y, destination_distance, destination_angle);
 }
-
-
