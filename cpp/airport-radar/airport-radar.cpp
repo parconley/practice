@@ -99,13 +99,15 @@ void ShowSpeedAndDirection() {
 }
 
 // Runs input functions to get a pair of polar coordinates,
-// a direction, a spped, and a time elapsed.
+// a direction, a speed, and a time elapsed.
 // Runs the calculate destination function to find
 // a hypothetical objects final destination given the input values.
 // Outputs the final destination point in polar coordinates.
 void ShowDestination() {
     // Gets inputs from user.
     double distance, angle;
+
+    cout << endl << "Enter the object's current location in polar coordinates." << endl;
     GetPolarPoint(distance, angle);
 
     double direction = GetDirection();
