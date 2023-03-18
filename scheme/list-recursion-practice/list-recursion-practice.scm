@@ -4,16 +4,13 @@
 
 #lang scheme
 
-; Problem (a)
-
 ; This function takes two vectors in the form of lists
 ; and returns the dot product.
 (define (dotProduct vector1 vector2)
   (if (null? vector1)
       0
-      (+ (* (car vector1) (car vector2)) (dotProduct (cdr vector1) (cdr vector2)))))
-
-; Problem (b)
+      (+ (* (car vector1) (car vector2))
+         (dotProduct (cdr vector1) (cdr vector2)))))
 
 ; This function takes a list.
 ; It returns #t if the list has duplicate atoms.
@@ -35,16 +32,12 @@
               #t
               (myMember (cdr list) atom))))
 
-; Problem (c)
-
+; This function takes a list of pairs, each representing an x, y coordinate.
+; Eg, '((1 . 1) (4 . 5) (6 . 5) (3 . 1)).
+; The function returns the distance between each of these points in order.
 (define (distance pairs)
   (if (null? (cdr pairs))
       0
-      (+ (sqrt (+ (expt (- (car (cdr pairs)) (car pairs)) 2)
-                  (expt (- (car (cdr pairs)) (car pairs)) 2)))
+      (+ (sqrt (+ (expt (- (car (car (cdr pairs))) (car (car pairs))) 2)
+                  (expt (- (cdr (car (cdr pairs))) (cdr (car pairs))) 2)))
          (distance (cdr pairs)))))
-
-; I did not impliment a way to nagivate with two lists. Fix this next time around
-    
-
-         
