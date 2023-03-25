@@ -126,26 +126,26 @@ rulerOf(catherine_i, russia, 1725, 1727).
 rulerOf(anna_ivanona, russia, 1730, 1740).
 
 grandparentOf(Grandparent, Person):-
-    parentOf(Grandparent, Parent), parentOf(Parent, Person).
+    parentOf(Grandparent, X), parentOf(X, Person).
 
 siblingOf(Person, Sibling):-
-    parentOf(Parent, Person), parentOf(Parent, Sibling), Person \= Sibling.
+    parentOf(X, Person), parentOf(X, Sibling), Person \= Sibling.
 
 firstCousinOf(Person, FirstCousin):-
-    grandparentOf(Grandparent, Person), grandparentOf(Grandparent, FirstCousin), Person \= FirstCousin.
+    grandparentOf(X, Person), grandparentOf(X, FirstCousin), Person \= FirstCousin.
 
 
 % Stopped here. Fix variables on all. Complete last two.
 ancestorOf(Ancestor, Person):-
-    parentOf(X, Y);
-    parentOf(X, Z), ancestorOf(Z, Y).
+    parentOf(Ancestor, Person);
+    parentOf(X, Person), ancestorOf(Ancestor, X).
 
-descendentOf(X, Y):-
-    parentOf(Y, X);
-    parentOf(Z, X), descendentOf(Y, Z).
+descendentOf(Decendent, Person):-
+    parentOf(Person, Decendent);
+    parentOf(X, Decendent), descendentOf(Person, X).
 
-contemporaryOf(A, B):-
-    rulerOf(X, Y, Z)
+%contemporaryOf(A, B):-
+%    rulerOf(X, Y, Z)
 
-successorOf(X, Y):-
-    %
+%successorOf(X, Y):-
+%    %
