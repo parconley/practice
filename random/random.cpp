@@ -3,18 +3,12 @@
 #include <iostream>
 using namespace std;
 
-void processCString(char source[]);
-void printFibonacci(int n);
-
 int main() {
-    char source[5] = {'h', 'e', 'l', 'l', 'i'};
-    processCString(source);
-}
+    int x{ 1 };
+    int *ptr = &x;
 
-void processCString(char source[]) {
-    for (int i = 0; source[i] != '\0'; ++i) {
-        cout << source[i];
-    }
-    
-    cout << endl;
+    cout << &ptr << endl;
+    cout << ptr << endl;
+    cout << &x << endl;
+    cout << *ptr << endl;
 }
