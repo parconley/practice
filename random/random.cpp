@@ -3,21 +3,18 @@
 #include <iostream>
 using namespace std;
 
-void intcopy(int dest[], int source[], int size);
-void printFibonacci(int end);
+void processCString(char source[]);
+void printFibonacci(int n);
 
 int main() {
-    
+    char source[5] = {'h', 'e', 'l', 'l', 'i'};
+    processCString(source);
 }
 
-void intcopy(int dest[], int source[], int size) {
-    for (int i = 0; i < size; i++) {
-        dest[i] = source[i];
+void processCString(char source[]) {
+    for (int i = 0; source[i] != '\0'; ++i) {
+        cout << source[i];
     }
-}
-
-void printFibonacci(int end) {
-    int count = 0;
-
     
+    cout << endl;
 }
