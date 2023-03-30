@@ -36,7 +36,7 @@
 (define (CalcWeeklyPaycheck is_hourly hours_or_sales_total hourly_rate donation)
   (- (if is_hourly
       (if (> hours_or_sales_total 40) ;paid hourly
-          (+ (* 40 hourly_rate) ;yes overtime: 40 times hourly rate + over time hours times 1.5x hourly rate
+          (+ (* 40 hourly_rate) ;yes overtime: 40 times hourly rate + over time hours * 1.5x hourly rate
              (* (- hours_or_sales_total 40)
                 hourly_rate
                 1.5)) 
