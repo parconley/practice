@@ -51,9 +51,9 @@ lifespan(ivan_dmitriev_mamonov, 1680, 1730).
 lifespan(praskovya, 1694, 1731).
 lifespan(feodosia, 1690, 1691).
 lifespan(karl_leopold, 1678, 1747).
-lifespan(catherine_ivanonva, 1691, 1733).
+lifespan(catherine_ivanova, 1691, 1733).
 lifespan(federick_william, 1692, 1711).
-lifespan(anna_ivanona, 1693, 1740).
+lifespan(anna_ivanova, 1693, 1740).
 
 
 % parentOf( <parent's name>, <child's name> ).
@@ -108,13 +108,13 @@ parentOf(natalya_naryshkina, peter_i_the_great).
 parentOf(ivan_v, maria).
 parentOf(ivan_v, praskovya).
 parentOf(ivan_v, feodosia).
-parentOf(ivan_v, catherine_ivanonva).
-parentOf(ivan_v, anna_ivanona).
+parentOf(ivan_v, catherine_ivanova).
+parentOf(ivan_v, anna_ivanova).
 parentOf(praskovia_saltykova, maria).
 parentOf(praskovia_saltykova, praskovya).
 parentOf(praskovia_saltykova, feodosia).
-parentOf(praskovia_saltykova, catherine_ivanonva).
-parentOf(praskovia_saltykova, anna_ivanona).
+parentOf(praskovia_saltykova, catherine_ivanova).
+parentOf(praskovia_saltykova, anna_ivanova).
 
 % rulerOf( <ruler's name>, <country's name>, <year began>, <year ended> ).
 rulerOf(mikhail_i, russia, 1613, 1645).
@@ -123,7 +123,7 @@ rulerOf(feodor_iii, russia, 1676, 1682).
 rulerOf(ivan_v, russia, 1682, 1696).
 rulerOf(peter_i_the_great, russia, 1682, 1725).
 rulerOf(catherine_i, russia, 1725, 1727).
-rulerOf(anna_ivanona, russia, 1730, 1740).
+rulerOf(anna_ivanova, russia, 1730, 1740).
 
 grandparentOf(Grandparent, Person):-
     parentOf(Grandparent, X), parentOf(X, Person).
@@ -134,8 +134,6 @@ siblingOf(Person, Sibling):-
 firstCousinOf(Person, FirstCousin):-
     grandparentOf(X, Person), grandparentOf(X, FirstCousin), Person \= FirstCousin.
 
-
-% Stopped here. Fix variables on all. Complete last two.
 ancestorOf(Ancestor, Person):-
     parentOf(Ancestor, Person);
     parentOf(X, Person), ancestorOf(Ancestor, X).
@@ -144,8 +142,12 @@ descendentOf(Decendent, Person):-
     parentOf(Person, Decendent);
     parentOf(X, Decendent), descendentOf(Person, X).
 
-%contemporaryOf(A, B):-
-%    rulerOf(X, Y, Z)
+%This doesn't seem to work yet.
+contemporaryOf(Person, Contemporary):-
+    lifespan(Person, PersonBrith, PersonDeath1),
+    lifespan(Contemporary, ContemporaryBirth, ContemporaryDeath),
+    Person \= Contemporary,
+    ((PersonBirth >= ContemporaryBirth, PersonBrith =< ContemporaryDeath); (ContemporaryBirth >= PersonBrith, ContemporaryBirth =< PersonDeath)).
 
 %successorOf(X, Y):-
 %    %
