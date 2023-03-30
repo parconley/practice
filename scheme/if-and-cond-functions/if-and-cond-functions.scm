@@ -22,12 +22,13 @@
 
 (define (IdentifyEggSize weight)
   (cond
-    ((and (>= weight 15)(< weight 18) "PeeWee"))
-    ((and (>= weight 18)(< weight 21) "Small"))
-    ((and (>= weight 21)(< weight 24) "Medium"))
-    ((and (>= weight 24)(< weight 27) "Large"))
-    ((and (>= weight 27)(< weight 30) "Extra Large"))
-    ((and (>= weight 30)(< weight 33) "Jumbo"))
+    ((< weight 15) "Invalid Size")
+    ((< weight 18) "PeeWee")
+    ((< weight 21) "Small")
+    ((< weight 24) "Medium")
+    ((< weight 27) "Large")
+    ((< weight 30) "Extra Large")
+    ((< weight 33) "Jumbo")
     (#t "Invalid Size")))
 
 ; (3) --------------------------------------------------------------------------
@@ -35,10 +36,13 @@
 (define (CalcWeeklyPaycheck is_hourly hours_or_sales_total hourly_rate donation)
   (- (if is_hourly
       (if (> hours_or_sales_total 40) ;paid hourly
-          (+ (* 40 hourly_rate) (* (- hours_or_sales_total 40) hourly_rate 1.5)) ;yes overtime: 40 times hourly rate + over time hours times 1.5x hourly rate
-          (* 40 hourly_rate)) ;no overtime
+          (+ (* 40 hourly_rate) ;yes overtime: 40 times hourly rate + over time hours times 1.5x hourly rate
+             (* (- hours_or_sales_total 40)
+                hourly_rate
+                1.5)) 
+          (* hours_or_sales_total hourly_rate)) ;no overtime
       (cond ;paid by commission
         ((< hours_or_sales_total 1000) (* hours_or_sales_total 0.1))
-        ((and (>= hours_or_sales_total 1000) (< hours_or_sales_total 5000)) (* hours_or_sales_total 0.15))
-        ((>= hours_or_sales_total 5000) (* hours_or_sales_total 0.20)))) 
+        ((< hours_or_sales_total 5000) (* hours_or_sales_total 0.15))
+        (#t (* hours_or_sales_total 0.20))))
      donation))
