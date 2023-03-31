@@ -125,29 +125,39 @@ rulerOf(peter_i_the_great, russia, 1682, 1725).
 rulerOf(catherine_i, russia, 1725, 1727).
 rulerOf(anna_ivanova, russia, 1730, 1740).
 
+% Checks to see if one person is the grandparent of another person.
 grandparentOf(Grandparent, Person):-
     parentOf(Grandparent, X), parentOf(X, Person).
 
+% Checks to see if two people are siblings.
 siblingOf(Person, Sibling):-
     parentOf(X, Person), parentOf(X, Sibling), Person \= Sibling.
 
+% Checks to see if two people are first cousins.
 firstCousinOf(Person, FirstCousin):-
     grandparentOf(X, Person), grandparentOf(X, FirstCousin), Person \= FirstCousin.
 
-ancestorOf(Ancestor, Person):-
+% Checks to see if one person is an ancestor of another person.
+ancestorOf(Person, Ancestor):-
     parentOf(Ancestor, Person);
     parentOf(X, Person), ancestorOf(Ancestor, X).
 
-descendentOf(Decendent, Person):-
+% Checks to see if one person is a descendent of another person.
+descendentOf(Person, Decendent):-
     parentOf(Person, Decendent);
     parentOf(X, Decendent), descendentOf(Person, X).
 
-%This doesn't seem to work yet.
+% Checks to see if two people were alive at the same time.
 contemporaryOf(Person, Contemporary):-
-    lifespan(Person, PersonBrith, PersonDeath1),
-    lifespan(Contemporary, ContemporaryBirth, ContemporaryDeath),
+    lifespan(Person, PBirth, PDeath),
+    lifespan(Contemporary, CBirth, CDeath),
     Person \= Contemporary,
-    ((PersonBirth >= ContemporaryBirth, PersonBrith =< ContemporaryDeath); (ContemporaryBirth >= PersonBrith, ContemporaryBirth =< PersonDeath)).
+    ((PBirth >= CBirth, PBirth =< CDeath); (CBirth >= PBirth, CBirth =< PDeath)).
 
-%successorOf(X, Y):-
-%    %
+% Checks to see if one persons rule ended in the same another person's rule began.
+successorOf(Ruler, Successor):-
+    rulerOf(Ruler, RCountry, _, REnd),
+    rulerOf(Successor, SCountry, SStart, _),
+    Ruler \= Successor,
+    RCountry = SCountry,
+    REnd = SStart.
