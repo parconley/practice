@@ -134,8 +134,9 @@ siblingOf(Person, Sibling):-
     parentOf(X, Person), parentOf(X, Sibling), Person \= Sibling.
 
 % Checks to see if two people are first cousins.
+% Note: There are no first cousins in this family tree.
 firstCousinOf(Person, FirstCousin):-
-    grandparentOf(X, Person), grandparentOf(X, FirstCousin), Person \= FirstCousin.
+    parentOf(X, Person), parentOf(Y, FirstCousin), siblingOf(X, Y), Person \= FirstCousin.
 
 % Checks to see if one person is an ancestor of another person.
 ancestorOf(Person, Ancestor):-
@@ -154,7 +155,8 @@ contemporaryOf(Person, Contemporary):-
     Person \= Contemporary,
     ((PBirth >= CBirth, PBirth =< CDeath); (CBirth >= PBirth, CBirth =< PDeath)).
 
-% Checks to see if one persons rule ended in the same another person's rule began.
+% Checks to see if one persons rule ended
+% in the same year that another person's rule began.
 successorOf(Ruler, Successor):-
     rulerOf(Ruler, RCountry, _, REnd),
     rulerOf(Successor, SCountry, SStart, _),
