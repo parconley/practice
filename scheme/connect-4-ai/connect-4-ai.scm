@@ -66,6 +66,7 @@
 ; This function takes a board and a token and adds the token to the board.
 (define (PRCPlaceToken lst token )
   (if (null? lst)
+      (raise '("Error: This row is full.")) ; XXX: Check with Mr. Simms to verify that this is allowed.
       (if (= (car lst) 0)
           (cons token (cdr lst))
           (cons (car lst) (PRCPlaceToken (cdr lst) token)))))
