@@ -31,7 +31,7 @@
   (if (null? Matrix)
       #f
       (if (= Column 1)
-          ((display Matrix) (car Matrix))
+          (car Matrix)
           (PRCGetCellInRow (cdr Matrix) (- Column 1)))))
 
 ; This function sets the cell at the specified row and column of the matrix to
@@ -64,21 +64,25 @@
   (if (= (car PRCGame) 1) 2 1))
 
 ; This function takes a board and a token and adds the token to the board.
-(define (PRCPlaceToken lst token )
-  (if (null? lst)
-      (raise '("Error: This row is full.")) ; XXX: Check with Mr. Simms to verify that this is allowed.
-      (if (= (car lst) 0)
-          (cons token (cdr lst))
-          (cons (car lst) (PRCPlaceToken (cdr lst) token)))))
+(define (PRCPlaceToken board token Col Row)
+  (if (null? board)
+      '()
+      (if (= Col 1)
+          (PRCSetCell board Row Col token)
+          (cons (car board) (PRCPlaceToken (cdr board) token (- Col 1) Row))))) ; THIS ONE
+
+(define (PRCGetRow board Col)
+  (if (null? board)
+      1
+      (if (= (PRCGetCell board 1 Col) 0)
+          (PRCGetRow (cdr board) Col)
+          (+ 1 (PRCGetRow (cdr board) Col)))))
 
 ; This function takes a list, token, and column.
 ; It ads the player's token to the specified column in the list.
 (define (PRCMove board token Col)
-  (if (null? board)
-      '()
-      (if (= Col 1)
-          (cons (PRCPlaceToken (car board) token) (cdr board))
-          (cons (car board) (PRCMove (cdr board) token (- Col 1))))))
+  (PRCSetCell board (PRCGetRow board Col) Col token))
+
 
 ; ------------------  Display Functions  ------------------
 
@@ -90,7 +94,7 @@
 
 (define (PRCShowRow row)
   (if (null? row)
-      (newline)
+      '()
       (begin
         (PRCShowCell (car row))
         (display " ")
@@ -98,10 +102,13 @@
 
 (define (PRCShowBoard board)
   (if (null? board)
-      (display "-------------") ; Print the bottom line when done
+      '()
       (begin
-        (PRCShowRow (car board))
-        (PRCShowBoard (cdr board)))))
+        (PRCShowBoard (cdr board))
+        (newline)
+        (PRCShowRow (car board)))))
+
+
 
 ; ------------------  MAIN FUNCTIONS  ------------------
 
@@ -113,7 +120,7 @@
 (define (PRCStartGame)
   (begin
     (set! PRCGame (cons 1 (PRCInitBoard)))
-    (display "Astral Codex Ten is based") (newline)
+    (display "Astral Codex Ten is a good blog. You should read it.") (newline)
     #t))
 
 ; This function takes a column number (numbered left to right from 1 to 7) as input
@@ -131,8 +138,9 @@
 (define (PRCShowGame)
   (begin
     (PRCShowPlayer) (newline)
+    (display "-------------")
+    (PRCShowBoard (cdr PRCGame)) (newline)
     (display "-------------") (newline)
-    (PRCShowBoard (cdr PRCGame))
     #t))
 
 ; This function should call the PRCChooseMove function to determine the next move.
