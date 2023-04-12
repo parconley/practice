@@ -71,6 +71,8 @@
           (PRCSetCell board Row Col token)
           (cons (car board) (PRCPlaceToken (cdr board) token (- Col 1) Row))))) ; THIS ONE
 
+; This function takes a board and a column and returns the row number of the
+; lowest empty cell in the column.
 (define (PRCGetRow board Col)
   (if (null? board)
       1
@@ -86,12 +88,14 @@
 
 ; ------------------  Display Functions  ------------------
 
+; This function takes a cell and displays it as a period, X, or O.
 (define (PRCShowCell value)
   (cond ((= value 0) (display "."))
         ((= value 1) (display "X"))
         ((= value 2) (display "O"))
         (else (display "?"))))
 
+; This function takes a row and displays it.
 (define (PRCShowRow row)
   (if (null? row)
       '()
@@ -100,6 +104,7 @@
         (display " ")
         (PRCShowRow (cdr row)))))
 
+; This function takes a board and displays it.
 (define (PRCShowBoard board)
   (if (null? board)
       '()
@@ -108,6 +113,44 @@
         (newline)
         (PRCShowRow (car board)))))
 
+
+; BELOW THREE FUNCTIONS ARE STILL IN PROGRESS AND DO NOT WORK
+; This function takes the most recent move and tests to see
+; if it is a winning move horizontally.
+(define (PRCWinPRow Col)
+  (if (null? (cdr PRCGame))
+      #f
+      ((if (and (= ((car (cdr PRCGame)) Col) ((car (cdr (cdr PRCGame))) Col))
+               (= ((car (cdr (cdr PRCGame))) Col) ((car (cdr (cdr (cdr PRCGame)))) Col))
+               (= ((car (cdr (cdr (cdr PRCGame)))) Col) ((car (cdr (cdr (cdr (cdr PRCGame)))))) Col))
+          #t
+          (PRCWinPRow (+ Col 1))))))
+
+; This function takes the most recent move and tests to see
+; if it is a winning move vertically.
+(define (PRCWinPColumn Col)
+  (if (null? (cdr PRCGame))
+      #f
+      (if (and (= (PRCGetCell (cdr PRCGame) 1 Col) (PRCGetCell (cdr PRCGame) 2 Col))
+               (= (PRCGetCell (cdr PRCGame) 2 Col) (PRCGetCell (cdr PRCGame) 3 Col))
+               (= (PRCGetCell (cdr PRCGame) 3 Col) (PRCGetCell (cdr PRCGame) 4 Col)))
+          #t
+          (PRCWinPColumn (+ Col 1)))))
+
+; This function takes the most recent move and tests to see
+; if it is a winning move diagonally.
+(define (PRCWinPDiagonal Col)
+  (if (null? (cdr PRCGame))
+      #f
+      (if (and (= (PRCGetCell (cdr PRCGame) 1 Col) (PRCGetCell (cdr PRCGame) 2 (+ Col 1)))
+               (= (PRCGetCell (cdr PRCGame) 2 (+ Col 1)) (PRCGetCell (cdr PRCGame) 3 (+ Col 2)))
+               (= (PRCGetCell (cdr PRCGame) 3 (+ Col 2)) (PRCGetCell (cdr PRCGame) 4 (+ Col 3))))
+          #t
+          (if (and (= (PRCGetCell (cdr PRCGame) 1 Col) (PRCGetCell (cdr PRCGame) 2 (- Col 1)))
+                   (= (PRCGetCell (cdr PRCGame) 2 (- Col 1)) (PRCGetCell (cdr PRCGame) 3 (- Col 2)))
+                   (= (PRCGetCell (cdr PRCGame) 3 (- Col 2)) (PRCGetCell (cdr PRCGame) 4 (- Col 3))))
+              #t
+              #f))))
 
 
 ; ------------------  MAIN FUNCTIONS  ------------------
@@ -123,16 +166,29 @@
     (display "Astral Codex Ten is a good blog. You should read it.") (newline)
     #t))
 
+; This function takes a column number as input and returns true or false
+; to indicate whether the move is legal or not.
+(define (PRCLegalMoveP Col)
+  (cond ((< Col 1) #f)
+        ((> Col 7) #f)
+        ((> (PRCGetRow (cdr PRCGame) Col) 6) #f) ; Checks if the column is full
+        (#t #t))) ; else, the move is legal
+
 ; This function takes a column number (numbered left to right from 1 to 7) as input
 ; and uses this input to update the global PRCGame variable.
 (define (PRCMarkMove Col)
-  (begin
-    (set! PRCGame
-          (cons (PRCNextPlayer)
-                (PRCMove (cdr PRCGame)
-                               (car PRCGame)
+  (if (PRCLegalMoveP Col)
+      (begin
+         (set! PRCGame
+               (cons (PRCNextPlayer)
+                     (PRCMove (cdr PRCGame)
+                              (car PRCGame)
                                Col)))
-    Col))
+         Col)
+      (begin
+        (display "Illegal move. Try again.") (newline)
+        #f)))
+
 
 ; This function displays the current game grid and returns #t.
 (define (PRCShowGame)
@@ -150,18 +206,17 @@
    ;(PRCChooseMove)
    (+ 1 (random 7))))
 
-; This function takes a column number as input and returns true or false
-; to indicate whether the move is legal or not.
-;(define (PRCLegalMoveP Col)
-;  (if (and (<= Col 7) (>= Col 1))
-;        ; dunno what to do next on this
-
-; This function tests the current game grid to see if the last move resulted in a win.
-; It accepts one argument that represents the column of the latest move, and returns true or false.
-;(define (PRCWinP Col)
-;  ())
-
 ; This function tests the current game grid to see if the given move (column)
 ; will result in a win, and return true or false.
 ;(define (PRCWillWinP Col)
 ;  ())
+
+; This function tests the current game grid to see if the last move resulted in a win.
+; It accepts one argument that represents the column of the latest move, and returns true or false.
+; NOTE: IN PROGRRESS
+(define (PRCWinP Col)
+  (cond ((PRCWinPRow Col) #t)
+        ((PRCWinPColumn Col) #t)
+        ;((PRCWinPDiagonal Col) #t)
+        (#t #f)))
+
