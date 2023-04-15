@@ -123,83 +123,91 @@
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move horizontally east.
-(define (PRCWinPRowE Col)
+(define (PRCWinPRowE board Col)
   (cond
-    ((null? (cdr PRCGame)) #f)
-    ((> Col 7) #f)
-    ((and (and (= (PRCGetCell (cdr PRCGame) 1 Col) (PRCGetCell (cdr PRCGame) 1 (+ Col 1))) (PRCNotZero? (PRCGetCell (cdr PRCGame) 1 (+ Col 1))))
-          (and (= (PRCGetCell (cdr PRCGame) 1 (+ Col 1)) (PRCGetCell (cdr PRCGame) 1 (+ Col 2))) (PRCNotZero? (PRCGetCell (cdr PRCGame) 1 (+ Col 2))))
-          (and (= (PRCGetCell (cdr PRCGame) 1 (+ Col 2)) (PRCGetCell (cdr PRCGame) 1 (+ Col 3))) (PRCNotZero? (PRCGetCell (cdr PRCGame) 1 (+ Col 3)))))
+    ((null? board) #f)
+    ((> Col 4) #f)
+    ((and (and (= (PRCGetCell board 1 Col) (PRCGetCell board 1 (+ Col 1))) (PRCNotZero? (PRCGetCell board 1 (+ Col 1))))
+          (and (= (PRCGetCell board 1 (+ Col 1)) (PRCGetCell board 1 (+ Col 2))) (PRCNotZero? (PRCGetCell board 1 (+ Col 2))))
+          (and (= (PRCGetCell board 1 (+ Col 2)) (PRCGetCell board 1 (+ Col 3))) (PRCNotZero? (PRCGetCell board 1 (+ Col 3)))))
      #t)
-    (#t (PRCWinPRowE (+ Col 1)))))
+    (#t (PRCWinPRowE board (+ Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move horizontally west.
-(define (PRCWinPRowW Col)
+(define (PRCWinPRowW board Col)
   (cond
-    ((null? (cdr PRCGame)) #f)
-    ((< Col 1) #f)
-    ((and (and (= (PRCGetCell (cdr PRCGame) 1 Col) (PRCGetCell (cdr PRCGame) 1 (- Col 1))) (PRCNotZero? (PRCGetCell (cdr PRCGame) 1 (- Col 1))))
-          (and (= (PRCGetCell (cdr PRCGame) 1 (- Col 1)) (PRCGetCell (cdr PRCGame) 1 (- Col 2))) (PRCNotZero? (PRCGetCell (cdr PRCGame) 1 (- Col 2))))
-          (and (= (PRCGetCell (cdr PRCGame) 1 (- Col 2)) (PRCGetCell (cdr PRCGame) 1 (- Col 3))) (PRCNotZero? (PRCGetCell (cdr PRCGame) 1 (- Col 3)))))
+    ((null? board) #f)
+    ((< Col 4) #f)
+    ((and (and (= (PRCGetCell board 1 Col) (PRCGetCell board 1 (- Col 1))) (PRCNotZero? (PRCGetCell board 1 (- Col 1))))
+          (and (= (PRCGetCell board 1 (- Col 1)) (PRCGetCell board 1 (- Col 2))) (PRCNotZero? (PRCGetCell board 1 (- Col 2))))
+          (and (= (PRCGetCell board 1 (- Col 2)) (PRCGetCell board 1 (- Col 3))) (PRCNotZero? (PRCGetCell board 1 (- Col 3)))))
      #t)
-    (#t (PRCWinPRowW (- Col 1)))))
+    (#t (PRCWinPRowW board (- Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move vertically.
-(define (PRCWinPColumn Row Col)
+(define (PRCWinPColumn board Row Col)
   (cond
-    ((null? (cdr PRCGame)) #f)
-    ((> Row 6) #f)
-    ((and (and (= (PRCGetCell (cdr PRCGame) Row Col) (PRCGetCell (cdr PRCGame) (+ Row 1) Col)) (PRCNotZero? (PRCGetCell (cdr PRCGame) (+ Row 1) Col)))
-          (and (= (PRCGetCell (cdr PRCGame) (+ Row 1) Col) (PRCGetCell (cdr PRCGame) (+ Row 2) Col)) (PRCNotZero? (PRCGetCell (cdr PRCGame) (+ Row 2) Col)))
-          (and (= (PRCGetCell (cdr PRCGame) (+ Row 2) Col) (PRCGetCell (cdr PRCGame) (+ Row 3) Col)) (PRCNotZero? (PRCGetCell (cdr PRCGame) (+ Row 3) Col))))
+    ((null? board) #f)
+    ((> Row 4) #f)
+    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) Col)) (PRCNotZero? (PRCGetCell board (+ Row 1) Col)))
+          (and (= (PRCGetCell board (+ Row 1) Col) (PRCGetCell board (+ Row 2) Col)) (PRCNotZero? (PRCGetCell board (+ Row 2) Col)))
+          (and (= (PRCGetCell board (+ Row 2) Col) (PRCGetCell board (+ Row 3) Col)) (PRCNotZero? (PRCGetCell board (+ Row 3) Col))))
      #t)
-    (#t (PRCWinPColumn (+ Row 1) Col))))
+    (#t (PRCWinPColumn board (+ Row 1) Col))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move north east diagonally.
-(define (PRCWinPDiagonalNE Row Col)
-  (if (null? (cdr PRCGame))
-      #f
-      (if (and (= (PRCGetCell (cdr PRCGame) Row Col) (PRCGetCell (cdr PRCGame) (+ Row 1) (+ Col 1)))
-               (= (PRCGetCell (cdr PRCGame) (+ Row 1) (+ Col 1)) (PRCGetCell (cdr PRCGame) (+ Row 2) (+ Col 2)))
-               (= (PRCGetCell (cdr PRCGame) (+ Row 2) (+ Col 2)) (PRCGetCell (cdr PRCGame) (+ Row 3) (+ Col 3))))
-          #t
-          (PRCWinPDiagonalNE (+ Row 1) (+ Col 1)))))
+(define (PRCWinPDiagonalNE board Row Col)
+  (cond
+    ((null? board) #f)
+    ((> Row 4) #f)
+    ((> Col 4) #f)
+    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) (+ Col 1))) (PRCNotZero? (PRCGetCell board (+ Row 1) (+ Col 1))))
+          (and (= (PRCGetCell board (+ Row 1) (+ Col 1)) (PRCGetCell board (+ Row 2) (+ Col 2))) (PRCNotZero? (PRCGetCell board (+ Row 2) (+ Col 2))))
+          (and (= (PRCGetCell board (+ Row 2) (+ Col 2)) (PRCGetCell board (+ Row 3) (+ Col 3))) (PRCNotZero? (PRCGetCell board (+ Row 3) (+ Col 3)))))
+     #t)
+    (#t (PRCWinPDiagonalNE board (+ Row 1) (+ Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move north west diagonally.
-(define (PRCWinPDiagonalNW Row Col)
-  (if (null? (cdr PRCGame))
-      #f
-      (if (and (= (PRCGetCell (cdr PRCGame) Row Col) (PRCGetCell (cdr PRCGame) (+ Row 1) (- Col 1)))
-               (= (PRCGetCell (cdr PRCGame) (+ Row 1) (- Col 1)) (PRCGetCell (cdr PRCGame) (+ Row 2) (- Col 2)))
-               (= (PRCGetCell (cdr PRCGame) (+ Row 2) (- Col 2)) (PRCGetCell (cdr PRCGame) (+ Row 3) (- Col 3))))
-          #t
-          (PRCWinPDiagonalNW (+ Row 1) (- Col 1)))))
+(define (PRCWinPDiagonalNW board Row Col)
+  (cond
+    ((null? board) #f)
+    ((> Row 4) #f)
+    ((< Col 4) #f)
+    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) (- Col 1))) (PRCNotZero? (PRCGetCell board (+ Row 1) (- Col 1))))
+          (and (= (PRCGetCell board (+ Row 1) (- Col 1)) (PRCGetCell board (+ Row 2) (- Col 2))) (PRCNotZero? (PRCGetCell board (+ Row 2) (- Col 2))))
+          (and (= (PRCGetCell board (+ Row 2) (- Col 2)) (PRCGetCell board (+ Row 3) (- Col 3))) (PRCNotZero? (PRCGetCell board (+ Row 3) (- Col 3)))))
+     #t)
+    (#t (PRCWinPDiagonalNW board (+ Row 1) (- Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move south east diagonally.
-(define (PRCWinPDiagonalSE Row Col)
-  (if (null? (cdr PRCGame))
-      #f
-      (if (and (= (PRCGetCell (cdr PRCGame) Row Col) (PRCGetCell (cdr PRCGame) (- Row 1) (+ Col 1)))
-               (= (PRCGetCell (cdr PRCGame) (- Row 1) (+ Col 1)) (PRCGetCell (cdr PRCGame) (- Row 2) (+ Col 2)))
-               (= (PRCGetCell (cdr PRCGame) (- Row 2) (+ Col 2)) (PRCGetCell (cdr PRCGame) (- Row 3) (+ Col 3))))
-          #t
-          (PRCWinPDiagonalSE (- Row 1) (+ Col 1)))))
+(define (PRCWinPDiagonalSE board Row Col)
+  (cond
+    ((null? board) #f)
+    ((< Row 4) #f)
+    ((> Col 4) #f)
+    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 1) (+ Col 1))) (PRCNotZero? (PRCGetCell board (- Row 1) (+ Col 1))))
+          (and (= (PRCGetCell board (- Row 1) (+ Col 1)) (PRCGetCell board (- Row 2) (+ Col 2))) (PRCNotZero? (PRCGetCell board (- Row 2) (+ Col 2))))
+          (and (= (PRCGetCell board (- Row 2) (+ Col 2)) (PRCGetCell board (- Row 3) (+ Col 3))) (PRCNotZero? (PRCGetCell board (- Row 3) (+ Col 3)))))
+     #t)
+    (#t (PRCWinPDiagonalSE board (- Row 1) (+ Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move south west diagonally.
-(define (PRCWinPDiagonalSW Row Col)
-  (if (null? (cdr PRCGame))
-      #f
-      (if (and (= (PRCGetCell (cdr PRCGame) Row Col) (PRCGetCell (cdr PRCGame) (- Row 1) (- Col 1)))
-               (= (PRCGetCell (cdr PRCGame) (- Row 1) (- Col 1)) (PRCGetCell (cdr PRCGame) (- Row 2) (- Col 2)))
-               (= (PRCGetCell (cdr PRCGame) (- Row 2) (- Col 2)) (PRCGetCell (cdr PRCGame) (- Row 3) (- Col 3))))
-          #t
-          (PRCWinPDiagonalSW (- Row 1) (- Col 1)))))
+(define (PRCWinPDiagonalSW board Row Col)
+  (cond
+    ((null? board) #f)
+    ((< Row 4) #f)
+    ((< Col 4) #f)
+    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 1) (- Col 1))) (PRCNotZero? (PRCGetCell board (- Row 1) (- Col 1))))
+          (and (= (PRCGetCell board (- Row 1) (- Col 1)) (PRCGetCell board (- Row 2) (- Col 2))) (PRCNotZero? (PRCGetCell board (- Row 2) (- Col 2))))
+          (and (= (PRCGetCell board (- Row 2) (- Col 2)) (PRCGetCell board (- Row 3) (- Col 3))) (PRCNotZero? (PRCGetCell board (- Row 3) (- Col 3)))))
+     #t)
+    (#t (PRCWinPDiagonalSW board (- Row 1) (- Col 1)))))
 
 ; ------------------  MAIN FUNCTIONS  ------------------
 
@@ -263,12 +271,33 @@
 ; It accepts one argument that represents the column of the latest move, and returns true or false.
 ; NOTE: IN PROGRRESS
 (define (PRCWinP Col)
-  (cond ((PRCWinPRowE Col) #t)
-        ((PRCWinPRowW Col) #t)
-        ((PRCWinPColumn 1 Col) #t)
-        ((PRCWinPDiagonalNE 1 Col) #t)
-        ((PRCWinPDiagonalNW 1 Col) #t)
-        ((PRCWinPDiagonalSE 1 Col) #t)
-        ((PRCWinPDiagonalSW 1 Col) #t)
+  (cond ((PRCWinPRowE (cdr PRCGame) Col) #t)
+        ((PRCWinPRowW (cdr PRCGame) Col) #t)
+        ((PRCWinPColumn (cdr PRCGame) 1 Col) #t)
+        ((PRCWinPDiagonalNE (cdr PRCGame) 1 Col) #t)
+        ((PRCWinPDiagonalNW (cdr PRCGame) 1 Col) #t)
+        ((PRCWinPDiagonalSE (cdr PRCGame) 1 Col) #t)
+        ((PRCWinPDiagonalSW (cdr PRCGame) 1 Col) #t)
         (#t #f)))
+
+; Test commands
+(define (test-PRCWinP)
+  (begin
+    (define test-board (list (list 1 1 1 1 0 0 0)
+                              (list 2 1 2 1 0 0 0)
+                              (list 2 2 1 1 1 0 0)
+                              (list 0 0 0 1 0 1 0)
+                              (list 0 0 0 0 0 0 0)
+                              (list 0 0 0 0 0 0 0)))
+    (display "Test 1: ") (display (if (PRCWinPRowE test-board 1) "Passed" "Failed")) (newline)
+    (display "Test 2: ") (display (if (PRCWinPRowW test-board 4) "Passed" "Failed")) (newline)
+    (display "Test 3: ") (display (if (PRCWinPColumn test-board 1 4) "Passed" "Failed")) (newline)
+    (display "Test 4: ") (display (if (PRCWinPDiagonalNE test-board 1 4) "Passed" "Failed")) (newline)
+    (display "Test 5: ") (display (if (PRCWinPDiagonalNW test-board 1 4) "Passed" "Failed")) (newline)
+    (display "Test 6: ") (display (if (PRCWinPDiagonalSE test-board 1 4) "Passed" "Failed")) (newline)
+    (display "Test 7: ") (display (if (PRCWinPDiagonalSW test-board 1 4) "Passed" "Failed")) (newline)
+  ))
+
+; Run the test-PRCWinP function to test the PRCWinP function and its associated helper functions
+(test-PRCWinP)
 
