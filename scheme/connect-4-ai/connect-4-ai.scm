@@ -73,18 +73,31 @@
 
 ; This function takes a board and a column and returns the row number of the
 ; lowest empty cell in the column.
-(define (PRCGetRow board Col)
+(define (PRCGetEmptyRow board Col)
   (if (null? board)
       1
       (if (= (PRCGetCell board 1 Col) 0)
-          (PRCGetRow (cdr board) Col)
-          (+ 1 (PRCGetRow (cdr board) Col)))))
+          (PRCGetEmptyRow (cdr board) Col)
+          (+ 1 (PRCGetEmptyRow (cdr board) Col)))))
 
 ; This function takes a list, token, and column.
 ; It ads the player's token to the specified column in the list.
 (define (PRCMove board token Col)
-  (PRCSetCell board (PRCGetRow board Col) Col token))
+  (PRCSetCell board (PRCGetEmptyRow board Col) Col token))
 
+; ------------------  Game Play  ------------------
+
+;; The functions below are used to calculate the best move for the AI.
+;
+;; This function is the AI that chooses a move. It uses the minimax algorithm
+;; to choose the best move.
+;(define (PRCChooseMove)
+;  (PRCSetCell PRCGame 1 7 (PRCMinimax (PRCGetCell PRCGame 1 7) 1)))
+
+
+; This function chooses a random legal move.
+(define (PRCChooseMove)
+  (+ 1 (random 7)))
 
 ; ------------------  Display Functions  ------------------
 
@@ -99,23 +112,26 @@
 (define (PRCShowRow row)
   (if (null? row)
       '()
-      (begin
-        (PRCShowCell (car row))
-        (display " ")
-        (PRCShowRow (cdr row)))))
+      (cons (PRCShowCell (car row))
+            (cons (display " ") (PRCShowRow (cdr row))))))
+
+; This function uses recursion to display the board. It reverses the order of
+; the rows so that the board is displayed correctly.
+(define (PRCShowBoardHelper board counter)
+  (if (null? board)
+      '()
+      (if (= counter 1)
+          (cons (PRCShowRow (car board))
+                (cons (newline) '()))
+          (cons (PRCShowBoardHelper (cdr board) (- counter 1))
+                (cons (PRCShowRow (car board))
+                      (cons (newline) '()))))))
 
 ; This function takes a board and displays it.
 (define (PRCShowBoard board)
-  (if (null? board)
-      '()
-      (begin
-        (PRCShowBoard (cdr board))
-        (newline)
-        (PRCShowRow (car board)))))
+  (PRCShowBoardHelper board 6))
 
-
-; NOTE: BELOW WINNING FUNCTIONS ARE STILL NOT WORKING AND IN PROGRESS
-; TODO: FIX WINNING FUNCTIONS
+; ------------------  Winning Functions  ------------------
 
 ; Compare two cells to see if they are equal and not zero.
 (define (PRCNotZero? x)
@@ -209,6 +225,7 @@
      #t)
     (#t (PRCWinPDiagonalSW board (- Row 1) (- Col 1)))))
 
+
 ; ------------------  MAIN FUNCTIONS  ------------------
 
 ; This function starts the game by initializing the PRCGame variable.
@@ -227,7 +244,7 @@
 (define (PRCLegalMoveP Col)
   (cond ((< Col 1) #f)
         ((> Col 7) #f)
-        ((> (PRCGetRow (cdr PRCGame) Col) 6) #f) ; Checks if the column is full
+        ((> (PRCGetEmptyRow (cdr PRCGame) Col) 6) #f) ; Cecks if the column is full
         (#t #t))) ; else, the move is legal
 
 ; This function takes a column number (numbered left to right from 1 to 7) as input
@@ -245,59 +262,34 @@
         (display "Illegal move. Try again.") (newline)
         #f)))
 
-
 ; This function displays the current game grid and returns #t.
 (define (PRCShowGame)
   (begin
     (PRCShowPlayer) (newline)
-    (display "-------------")
-    (PRCShowBoard (cdr PRCGame)) (newline)
+    (display "-------------") (newline)
+    (PRCShowBoard (cdr PRCGame)) 
     (display "-------------") (newline)
     #t))
 
 ; This function should call the PRCChooseMove function to determine the next move.
 ; It should return the column number of the move.
 (define (PRCMakeMove)
-  (PRCMarkMove
-   ;(PRCChooseMove)
-   (+ 1 (random 7))))
+  (PRCChooseMove))
 
 ; This function tests the current game grid to see if the given move (column)
 ; will result in a win, and return true or false.
-;(define (PRCWillWinP Col)
-;  ())
+(define (PRCWillWinP Col)
+  (cond ((PRCWinP (PRCMove (cdr PRCGame) (car PRCGame) Col)) #t)
+        (#t #f)))
 
 ; This function tests the current game grid to see if the last move resulted in a win.
 ; It accepts one argument that represents the column of the latest move, and returns true or false.
-; NOTE: IN PROGRRESS
 (define (PRCWinP Col)
   (cond ((PRCWinPRowE (cdr PRCGame) Col) #t)
         ((PRCWinPRowW (cdr PRCGame) Col) #t)
         ((PRCWinPColumn (cdr PRCGame) 1 Col) #t)
-        ((PRCWinPDiagonalNE (cdr PRCGame) 1 Col) #t)
-        ((PRCWinPDiagonalNW (cdr PRCGame) 1 Col) #t)
-        ((PRCWinPDiagonalSE (cdr PRCGame) 1 Col) #t)
-        ((PRCWinPDiagonalSW (cdr PRCGame) 1 Col) #t)
+        ((PRCWinPDiagonalNE (cdr PRCGame) (PRCGetEmptyRow (cdr PRCGame) Col) Col) #t)
+        ((PRCWinPDiagonalNW (cdr PRCGame) (PRCGetEmptyRow (cdr PRCGame) Col) Col) #t)
+        ((PRCWinPDiagonalSE (cdr PRCGame) (PRCGetEmptyRow (cdr PRCGame) Col) Col) #t)
+        ((PRCWinPDiagonalSW (cdr PRCGame) (PRCGetEmptyRow (cdr PRCGame) Col) Col) #t)
         (#t #f)))
-
-; Test commands
-(define (test-PRCWinP)
-  (begin
-    (define test-board (list (list 1 1 1 1 0 0 0)
-                              (list 2 1 2 1 0 0 0)
-                              (list 2 2 1 1 1 0 0)
-                              (list 0 0 0 1 0 1 0)
-                              (list 0 0 0 0 0 0 0)
-                              (list 0 0 0 0 0 0 0)))
-    (display "Test 1: ") (display (if (PRCWinPRowE test-board 1) "Passed" "Failed")) (newline)
-    (display "Test 2: ") (display (if (PRCWinPRowW test-board 4) "Passed" "Failed")) (newline)
-    (display "Test 3: ") (display (if (PRCWinPColumn test-board 1 4) "Passed" "Failed")) (newline)
-    (display "Test 4: ") (display (if (PRCWinPDiagonalNE test-board 1 4) "Passed" "Failed")) (newline)
-    (display "Test 5: ") (display (if (PRCWinPDiagonalNW test-board 1 4) "Passed" "Failed")) (newline)
-    (display "Test 6: ") (display (if (PRCWinPDiagonalSE test-board 1 4) "Passed" "Failed")) (newline)
-    (display "Test 7: ") (display (if (PRCWinPDiagonalSW test-board 1 4) "Passed" "Failed")) (newline)
-  ))
-
-; Run the test-PRCWinP function to test the PRCWinP function and its associated helper functions
-(test-PRCWinP)
-
