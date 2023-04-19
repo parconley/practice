@@ -80,6 +80,15 @@
           (PRCGetEmptyRow (cdr board) Col)
           (+ 1 (PRCGetEmptyRow (cdr board) Col)))))
 
+; This function takes a board and a column and returns the row number of the
+; top token in the column.
+(define (PRCGetTopRow board Col)
+  (if (null? board)
+      0
+      (if (= (PRCGetCell board 1 Col) 0)
+          (PRCGetTopRow (cdr board) Col)
+          (+ 1 (PRCGetTopRow (cdr board) Col)))))
+
 ; This function takes a list, token, and column.
 ; It ads the player's token to the specified column in the list.
 (define (PRCMove board token Col)
@@ -87,17 +96,16 @@
 
 ; ------------------  Game Play  ------------------
 
-;; The functions below are used to calculate the best move for the AI.
-;
-;; This function is the AI that chooses a move. It uses the minimax algorithm
-;; to choose the best move.
-;(define (PRCChooseMove)
-;  (PRCSetCell PRCGame 1 7 (PRCMinimax (PRCGetCell PRCGame 1 7) 1)))
-
+; This function takes a random number and returns the number if it is a legal
+; move. Otherwise, it calls itself again with a new random number.
+(define (PRCRandomMove number)
+  (if (PRCLegalMoveP number)
+      number
+      (PRCRandomMove (+ 1 (random 7)))))
 
 ; This function chooses a random legal move.
 (define (PRCChooseMove)
-  (+ 1 (random 7)))
+  (PRCRandomMove (+ 1 (random 7))))
 
 ; ------------------  Display Functions  ------------------
 
@@ -142,7 +150,7 @@
 (define (PRCWinPRowE board Col)
   (cond
     ((null? board) #f)
-    ((> Col 4) #f)
+    ((and (> Col 4) (< Col 7)) #f)
     ((and (and (= (PRCGetCell board 1 Col) (PRCGetCell board 1 (+ Col 1))) (PRCNotZero? (PRCGetCell board 1 (+ Col 1))))
           (and (= (PRCGetCell board 1 (+ Col 1)) (PRCGetCell board 1 (+ Col 2))) (PRCNotZero? (PRCGetCell board 1 (+ Col 2))))
           (and (= (PRCGetCell board 1 (+ Col 2)) (PRCGetCell board 1 (+ Col 3))) (PRCNotZero? (PRCGetCell board 1 (+ Col 3)))))
@@ -154,7 +162,7 @@
 (define (PRCWinPRowW board Col)
   (cond
     ((null? board) #f)
-    ((< Col 4) #f)
+    ((and (> Col 4) (< Col 7)) #f)
     ((and (and (= (PRCGetCell board 1 Col) (PRCGetCell board 1 (- Col 1))) (PRCNotZero? (PRCGetCell board 1 (- Col 1))))
           (and (= (PRCGetCell board 1 (- Col 1)) (PRCGetCell board 1 (- Col 2))) (PRCNotZero? (PRCGetCell board 1 (- Col 2))))
           (and (= (PRCGetCell board 1 (- Col 2)) (PRCGetCell board 1 (- Col 3))) (PRCNotZero? (PRCGetCell board 1 (- Col 3)))))
@@ -162,16 +170,16 @@
     (#t (PRCWinPRowW board (- Col 1)))))
 
 ; This function takes the most recent move and tests to see
-; if it is a winning move vertically.
+; if it is a winning move vertically from to top row down.
 (define (PRCWinPColumn board Row Col)
   (cond
     ((null? board) #f)
-    ((> Row 4) #f)
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) Col)) (PRCNotZero? (PRCGetCell board (+ Row 1) Col)))
-          (and (= (PRCGetCell board (+ Row 1) Col) (PRCGetCell board (+ Row 2) Col)) (PRCNotZero? (PRCGetCell board (+ Row 2) Col)))
-          (and (= (PRCGetCell board (+ Row 2) Col) (PRCGetCell board (+ Row 3) Col)) (PRCNotZero? (PRCGetCell board (+ Row 3) Col))))
+    ((and (> Row 4) (< Row 7)) #f)
+    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 1) Col)) (PRCNotZero? (PRCGetCell board (- Row 1) Col)))
+          (and (= (PRCGetCell board (- Row 1) Col) (PRCGetCell board (- Row 2) Col)) (PRCNotZero? (PRCGetCell board (- Row 2) Col)))
+          (and (= (PRCGetCell board (- Row 2) Col) (PRCGetCell board (- Row 3) Col)) (PRCNotZero? (PRCGetCell board (- Row 3) Col))))
      #t)
-    (#t (PRCWinPColumn board (+ Row 1) Col))))
+    (#t (PRCWinPColumn board (- Row 1) Col))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move north east diagonally.
@@ -225,6 +233,17 @@
      #t)
     (#t (PRCWinPDiagonalSW board (- Row 1) (- Col 1)))))
 
+; This function takes a board and tests to see if the next player's
+; token will win the game if placed in the specified column.
+(define (PRCWillWinPHelper board Col)
+  (cond ((PRCWinPRowE board Col) #t)
+        ((PRCWinPRowW board Col) #t)
+        ((PRCWinPColumn board (PRCGetTopRow board Col) Col) #t)
+        ((PRCWinPDiagonalNE board (PRCGetTopRow board Col) Col) #t)
+        ((PRCWinPDiagonalNW board (PRCGetTopRow board Col) Col) #t)
+        ((PRCWinPDiagonalSE board (PRCGetTopRow board Col) Col) #t)
+        ((PRCWinPDiagonalSW board (PRCGetTopRow board Col) Col) #t)
+        (#t #f)))
 
 ; ------------------  MAIN FUNCTIONS  ------------------
 
@@ -244,7 +263,7 @@
 (define (PRCLegalMoveP Col)
   (cond ((< Col 1) #f)
         ((> Col 7) #f)
-        ((> (PRCGetEmptyRow (cdr PRCGame) Col) 6) #f) ; Cecks if the column is full
+        ((> (PRCGetEmptyRow (cdr PRCGame) Col) 6) #f) ; Checks if the column is full
         (#t #t))) ; else, the move is legal
 
 ; This function takes a column number (numbered left to right from 1 to 7) as input
@@ -279,7 +298,7 @@
 ; This function tests the current game grid to see if the given move (column)
 ; will result in a win, and return true or false.
 (define (PRCWillWinP Col)
-  (cond ((PRCWinP (PRCMove (cdr PRCGame) (car PRCGame) Col)) #t)
+  (cond ((PRCWillWinPHelper (PRCMove (cdr PRCGame) (car PRCGame) Col) Col) #t)
         (#t #f)))
 
 ; This function tests the current game grid to see if the last move resulted in a win.
@@ -287,9 +306,9 @@
 (define (PRCWinP Col)
   (cond ((PRCWinPRowE (cdr PRCGame) Col) #t)
         ((PRCWinPRowW (cdr PRCGame) Col) #t)
-        ((PRCWinPColumn (cdr PRCGame) 1 Col) #t)
-        ((PRCWinPDiagonalNE (cdr PRCGame) (PRCGetEmptyRow (cdr PRCGame) Col) Col) #t)
-        ((PRCWinPDiagonalNW (cdr PRCGame) (PRCGetEmptyRow (cdr PRCGame) Col) Col) #t)
-        ((PRCWinPDiagonalSE (cdr PRCGame) (PRCGetEmptyRow (cdr PRCGame) Col) Col) #t)
-        ((PRCWinPDiagonalSW (cdr PRCGame) (PRCGetEmptyRow (cdr PRCGame) Col) Col) #t)
+        ((PRCWinPColumn (cdr PRCGame) (PRCGetTopRow (cdr PRCGame) Col) Col) #t)
+        ((PRCWinPDiagonalNE (cdr PRCGame) (PRCGetTopRow (cdr PRCGame) Col) Col) #t)
+        ((PRCWinPDiagonalNW (cdr PRCGame) (PRCGetTopRow (cdr PRCGame) Col) Col) #t)
+        ((PRCWinPDiagonalSE (cdr PRCGame) (PRCGetTopRow (cdr PRCGame) Col) Col) #t)
+        ((PRCWinPDiagonalSW (cdr PRCGame) (PRCGetTopRow (cdr PRCGame) Col) Col) #t)
         (#t #f)))
