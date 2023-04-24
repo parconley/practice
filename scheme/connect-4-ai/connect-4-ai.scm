@@ -9,14 +9,10 @@
 ; ------------------  List Manipulation  ------------------
 
 ; This function makes a list with a given amount (n) of an atom. 
-(define (PRCMakeList n atom)
-  (if (= n 0)
+(define (PRCMakeList N Atom)
+  (if (= N 0)
       '()
-      (cons atom (PRCMakeList (- n 1) atom))))
-
-; This function intializes the PRCGame variable with a blank board.
-(define (PRCInitBoard)
-  (PRCMakeList 6 (PRCMakeList 7 0)))
+      (cons Atom (PRCMakeList (- N 1) Atom))))
 
 ; This function returns the cell at the specified row and column of the matrix.
 (define (PRCGetCell Matrix Row Col)
@@ -53,6 +49,10 @@
 
 ; ------------------  Game Functions  ------------------
 
+; This function intializes the PRCGame variable with a blank board.
+(define (PRCInitBoard)
+  (PRCMakeList 6 (PRCMakeList 7 0)))
+
 ; This function retursn the piece of the player whose turn it is.
 (define (PRCShowPlayer)
   (if (= (car PRCGame) 1)
@@ -64,43 +64,43 @@
   (if (= (car PRCGame) 1) 2 1))
 
 ; This function takes a board and a token and adds the token to the board.
-(define (PRCPlaceToken board token Col Row)
-  (if (null? board)
+(define (PRCPlaceToken Board Token Col Row)
+  (if (null? Board)
       '()
       (if (= Col 1)
-          (PRCSetCell board Row Col token)
-          (cons (car board) (PRCPlaceToken (cdr board) token (- Col 1) Row))))) ; THIS ONE
+          (PRCSetCell Board Row Col Token)
+          (cons (car Board) (PRCPlaceToken (cdr Board) Token (- Col 1) Row)))))
 
 ; This function takes a board and a column and returns the row number of the
 ; lowest empty cell in the column.
-(define (PRCGetEmptyRow board Col)
-  (if (null? board)
+(define (PRCGetEmptyRow Board Col)
+  (if (null? Board)
       1
-      (if (= (PRCGetCell board 1 Col) 0)
-          (PRCGetEmptyRow (cdr board) Col)
-          (+ 1 (PRCGetEmptyRow (cdr board) Col)))))
+      (if (= (PRCGetCell Board 1 Col) 0)
+          (PRCGetEmptyRow (cdr Board) Col)
+          (+ 1 (PRCGetEmptyRow (cdr Board) Col)))))
 
 ; This function takes a board and a column and returns the row number of the
 ; top token in the column.
-(define (PRCGetTopRow board Col)
-  (if (null? board)
+(define (PRCGetTopRow Board Col)
+  (if (null? Board)
       0
-      (if (= (PRCGetCell board 1 Col) 0)
-          (PRCGetTopRow (cdr board) Col)
-          (+ 1 (PRCGetTopRow (cdr board) Col)))))
+      (if (= (PRCGetCell Board 1 Col) 0)
+          (PRCGetTopRow (cdr Board) Col)
+          (+ 1 (PRCGetTopRow (cdr Board) Col)))))
 
 ; This function takes a list, token, and column.
 ; It ads the player's token to the specified column in the list.
-(define (PRCMove board token Col)
-  (PRCSetCell board (PRCGetEmptyRow board Col) Col token))
+(define (PRCMove Board Token Col)
+  (PRCSetCell Board (PRCGetEmptyRow Board Col) Col Token))
 
 ; ------------------  Game Play  ------------------
 
 ; This function takes a random number and returns the number if it is a legal
 ; move. Otherwise, it calls itself again with a new random number.
-(define (PRCRandomMove number)
-  (if (PRCLegalMoveP number)
-      number
+(define (PRCRandomMove Number)
+  (if (PRCLegalMoveP Number)
+      Number
       (PRCRandomMove (+ 1 (random 7)))))
 
 ; This function chooses a random legal move.
@@ -110,34 +110,34 @@
 ; ------------------  Display Functions  ------------------
 
 ; This function takes a cell and displays it as a period, X, or O.
-(define (PRCShowCell value)
-  (cond ((= value 0) (display "."))
-        ((= value 1) (display "X"))
-        ((= value 2) (display "O"))
+(define (PRCShowCell Value)
+  (cond ((= Value 0) (display "."))
+        ((= Value 1) (display "X"))
+        ((= Value 2) (display "O"))
         (else (display "?"))))
 
 ; This function takes a row and displays it.
-(define (PRCShowRow row)
-  (if (null? row)
+(define (PRCShowRow Row)
+  (if (null? Row)
       '()
-      (cons (PRCShowCell (car row))
-            (cons (display " ") (PRCShowRow (cdr row))))))
+      (cons (PRCShowCell (car Row))
+            (cons (display " ") (PRCShowRow (cdr Row))))))
 
 ; This function uses recursion to display the board. It reverses the order of
 ; the rows so that the board is displayed correctly.
-(define (PRCShowBoardHelper board counter)
-  (if (null? board)
+(define (PRCShowBoardHelper Board Counter)
+  (if (null? Board)
       '()
-      (if (= counter 1)
-          (cons (PRCShowRow (car board))
+      (if (= Counter 1)
+          (cons (PRCShowRow (car Board))
                 (cons (newline) '()))
-          (cons (PRCShowBoardHelper (cdr board) (- counter 1))
-                (cons (PRCShowRow (car board))
+          (cons (PRCShowBoardHelper (cdr Board) (- Counter 1))
+                (cons (PRCShowRow (car Board))
                       (cons (newline) '()))))))
 
 ; This function takes a board and displays it.
-(define (PRCShowBoard board)
-  (PRCShowBoardHelper board 6))
+(define (PRCShowBoard Board)
+  (PRCShowBoardHelper Board 6))
 
 ; ------------------  Winning Functions  ------------------
 
@@ -147,193 +147,193 @@
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move horizontally east.
-(define (PRCWinPRowE board Row Col)
+(define (PRCWinPRowE Board Row Col)
   (cond
-    ((null? board) #f) 
+    ((null? Board) #f) 
     ((> Col 4) #f) ; If the column is less than 4, there are not enough cells to the right to win.
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board Row (+ Col 1))) (PRCNotZero? (PRCGetCell board Row (+ Col 1))))
-          (and (= (PRCGetCell board Row (+ Col 1)) (PRCGetCell board Row (+ Col 2))) (PRCNotZero? (PRCGetCell board Row (+ Col 2))))
-          (and (= (PRCGetCell board Row (+ Col 2)) (PRCGetCell board Row (+ Col 3))) (PRCNotZero? (PRCGetCell board Row (+ Col 3)))))
+    ((and (and (= (PRCGetCell Board Row Col) (PRCGetCell Board Row (+ Col 1))) (PRCNotZero? (PRCGetCell Board Row (+ Col 1))))
+          (and (= (PRCGetCell Board Row (+ Col 1)) (PRCGetCell Board Row (+ Col 2))) (PRCNotZero? (PRCGetCell Board Row (+ Col 2))))
+          (and (= (PRCGetCell Board Row (+ Col 2)) (PRCGetCell Board Row (+ Col 3))) (PRCNotZero? (PRCGetCell Board Row (+ Col 3)))))
      #t)
-    (#t (PRCWinPRowE board Row (+ Col 1)))))
+    (#t (PRCWinPRowE Board Row (+ Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move horizontally west.
-(define (PRCWinPRowW board Row Col)
+(define (PRCWinPRowW Board Row Col)
   (cond
-    ((null? board) #f)
+    ((null? Board) #f)
     ((< Col 4) #f) ; If the column is greater than 4, there are not enough cells to the left to win.
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board Row (- Col 1))) (PRCNotZero? (PRCGetCell board Row (- Col 1))))
-          (and (= (PRCGetCell board Row (- Col 1)) (PRCGetCell board Row (- Col 2))) (PRCNotZero? (PRCGetCell board Row (- Col 2))))
-          (and (= (PRCGetCell board Row (- Col 2)) (PRCGetCell board Row (- Col 3))) (PRCNotZero? (PRCGetCell board Row (- Col 3)))))
+    ((and (and (= (PRCGetCell Board Row Col) (PRCGetCell Board Row (- Col 1))) (PRCNotZero? (PRCGetCell Board Row (- Col 1))))
+          (and (= (PRCGetCell Board Row (- Col 1)) (PRCGetCell Board Row (- Col 2))) (PRCNotZero? (PRCGetCell Board Row (- Col 2))))
+          (and (= (PRCGetCell Board Row (- Col 2)) (PRCGetCell Board Row (- Col 3))) (PRCNotZero? (PRCGetCell Board Row (- Col 3)))))
      #t)
-    (#t (PRCWinPRowW board Row (- Col 1)))))
+    (#t (PRCWinPRowW Board Row (- Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move with two tokens on its right and one token on its left.
-(define (PRCWinPRowRight2Left1 board Row Col)
+(define (PRCWinPRowRight2Left1 Board Row Col)
   (cond
-    ((null? board) #f)
+    ((null? Board) #f)
     ((< Col 2) #f) ; If the column is less than 2, there are not enough cells to the left to win.
     ((> Col 5) #f) ; If the column is greater than 5, there are not enough cells to the right to win.
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board Row (- Col 1))) (PRCNotZero? (PRCGetCell board Row (- Col 1))))
-          (and (= (PRCGetCell board Row Col) (PRCGetCell board Row (+ Col 1))) (PRCNotZero? (PRCGetCell board Row (+ Col 1))))
-          (and (= (PRCGetCell board Row Col) (PRCGetCell board Row (+ Col 2))) (PRCNotZero? (PRCGetCell board Row (+ Col 2)))))
+    ((and (and (= (PRCGetCell Board Row Col) (PRCGetCell Board Row (- Col 1))) (PRCNotZero? (PRCGetCell Board Row (- Col 1))))
+          (and (= (PRCGetCell Board Row Col) (PRCGetCell Board Row (+ Col 1))) (PRCNotZero? (PRCGetCell Board Row (+ Col 1))))
+          (and (= (PRCGetCell Board Row Col) (PRCGetCell Board Row (+ Col 2))) (PRCNotZero? (PRCGetCell Board Row (+ Col 2)))))
      #t)
-    (#t (PRCWinPRowRight2Left1 board Row (+ Col 1)))))
+    (#t (PRCWinPRowRight2Left1 Board Row (+ Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move with one token on its right and two tokens on its left.
-(define (PRCWinPRowLeft2Right1 board Row Col)
+(define (PRCWinPRowLeft2Right1 Board Row Col)
   (cond
-    ((null? board) #f)
+    ((null? Board) #f)
     ((< Col 3) #f) ; If the column is less than 3, there are not enough cells to the left to win.
     ((> Col 6) #f) ; If the column is greater than 6, there are not enough cells to the right to win.
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board Row (+ Col 1))) (PRCNotZero? (PRCGetCell board Row (+ Col 1))))
-          (and (= (PRCGetCell board Row Col) (PRCGetCell board Row (- Col 1))) (PRCNotZero? (PRCGetCell board Row (- Col 1))))
-          (and (= (PRCGetCell board Row Col) (PRCGetCell board Row (- Col 2))) (PRCNotZero? (PRCGetCell board Row (- Col 2)))))
+    ((and (and (= (PRCGetCell Board Row Col) (PRCGetCell Board Row (+ Col 1))) (PRCNotZero? (PRCGetCell Board Row (+ Col 1))))
+          (and (= (PRCGetCell Board Row Col) (PRCGetCell Board Row (- Col 1))) (PRCNotZero? (PRCGetCell Board Row (- Col 1))))
+          (and (= (PRCGetCell Board Row Col) (PRCGetCell Board Row (- Col 2))) (PRCNotZero? (PRCGetCell Board Row (- Col 2)))))
      #t)
-    (#t (PRCWinPRowLeft2Right1 board Row (+ Col 1)))))
+    (#t (PRCWinPRowLeft2Right1 Board Row (+ Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move horizontally from left to right.
-(define (PRCWinPRow board Row Col)
-  (or (PRCWinPRowE board Row Col)
-      (PRCWinPRowW board Row Col)
-      (PRCWinPRowRight2Left1 board Row Col)
-      (PRCWinPRowLeft2Right1 board Row Col)))
+(define (PRCWinPRow Board Row Col)
+  (or (PRCWinPRowE Board Row Col)
+      (PRCWinPRowW Board Row Col)
+      (PRCWinPRowRight2Left1 Board Row Col)
+      (PRCWinPRowLeft2Right1 Board Row Col)))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move vertically from to top row down.
-(define (PRCWinPCol board Row Col)
+(define (PRCWinPCol Board Row Col)
   (cond
-    ((null? board) #f)
-    ((> Row 3) #f) ; If the row is less than 3, there are not enough cells below to win.
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) Col)) (PRCNotZero? (PRCGetCell board (+ Row 1) Col)))
-          (and (= (PRCGetCell board (+ Row 1) Col) (PRCGetCell board (+ Row 2) Col)) (PRCNotZero? (PRCGetCell board (+ Row 2) Col)))
-          (and (= (PRCGetCell board (+ Row 2) Col) (PRCGetCell board (+ Row 3) Col)) (PRCNotZero? (PRCGetCell board (+ Row 3) Col))))
+    ((null? Board) #f)
+    ((< Row 4) #f) ; If the row is less than 3, there are not enough cells below to win. 
+    ((and (and (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 1) Col)) (PRCNotZero? (PRCGetCell Board (- Row 1) Col)))
+          (and (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 2) Col)) (PRCNotZero? (PRCGetCell Board (- Row 2) Col)))
+          (and (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 3) Col)) (PRCNotZero? (PRCGetCell Board (- Row 3) Col))))
      #t)
-    (#t (PRCWinPCol board (+ Row 1) Col))))
+    (#t (PRCWinPCol Board (- Row 1) Col))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move north east diagonally.
-(define (PRCWinPDiagonalNEHelper board Row Col)
+(define (PRCWinPDiagonalNEHelper Board Row Col)
   (cond
-    ((null? board) #f)
+    ((null? Board) #f)
     ((> Row 4) #f)
     ((> Col 4) #f) ; If the row is greater than 4 or the column is greater than 4, there are not enough cells below or to the right to win.
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) (+ Col 1))) (PRCNotZero? (PRCGetCell board (+ Row 1) (+ Col 1))))
-          (and (= (PRCGetCell board (+ Row 1) (+ Col 1)) (PRCGetCell board (+ Row 2) (+ Col 2))) (PRCNotZero? (PRCGetCell board (+ Row 2) (+ Col 2))))
-          (and (= (PRCGetCell board (+ Row 2) (+ Col 2)) (PRCGetCell board (+ Row 3) (+ Col 3))) (PRCNotZero? (PRCGetCell board (+ Row 3) (+ Col 3)))))
+    ((and (and (= (PRCGetCell Board Row Col) (PRCGetCell Board (+ Row 1) (+ Col 1))) (PRCNotZero? (PRCGetCell Board (+ Row 1) (+ Col 1))))
+          (and (= (PRCGetCell Board (+ Row 1) (+ Col 1)) (PRCGetCell Board (+ Row 2) (+ Col 2))) (PRCNotZero? (PRCGetCell Board (+ Row 2) (+ Col 2))))
+          (and (= (PRCGetCell Board (+ Row 2) (+ Col 2)) (PRCGetCell Board (+ Row 3) (+ Col 3))) (PRCNotZero? (PRCGetCell Board (+ Row 3) (+ Col 3)))))
      #t)
-    (#t (PRCWinPDiagonalNEHelper board (+ Row 1) (+ Col 1)))))
+    (#t (PRCWinPDiagonalNEHelper Board (+ Row 1) (+ Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move north west diagonally.
-(define (PRCWinPDiagonalNWHelper board Row Col)
+(define (PRCWinPDiagonalNWHelper Board Row Col)
   (cond
-    ((null? board) #f)
+    ((null? Board) #f)
     ((> Row 4) #f)
     ((< Col 4) #f) ; If the row is greater than 4 or the column is less than 4, there are not enough cells below or to the left to win.
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) (- Col 1))) (PRCNotZero? (PRCGetCell board (+ Row 1) (- Col 1))))
-          (and (= (PRCGetCell board (+ Row 1) (- Col 1)) (PRCGetCell board (+ Row 2) (- Col 2))) (PRCNotZero? (PRCGetCell board (+ Row 2) (- Col 2))))
-          (and (= (PRCGetCell board (+ Row 2) (- Col 2)) (PRCGetCell board (+ Row 3) (- Col 3))) (PRCNotZero? (PRCGetCell board (+ Row 3) (- Col 3)))))
+    ((and (and (= (PRCGetCell Board Row Col) (PRCGetCell Board (+ Row 1) (- Col 1))) (PRCNotZero? (PRCGetCell Board (+ Row 1) (- Col 1))))
+          (and (= (PRCGetCell Board (+ Row 1) (- Col 1)) (PRCGetCell Board (+ Row 2) (- Col 2))) (PRCNotZero? (PRCGetCell Board (+ Row 2) (- Col 2))))
+          (and (= (PRCGetCell Board (+ Row 2) (- Col 2)) (PRCGetCell Board (+ Row 3) (- Col 3))) (PRCNotZero? (PRCGetCell Board (+ Row 3) (- Col 3)))))
      #t)
-    (#t (PRCWinPDiagonalNWHelper board (+ Row 1) (- Col 1)))))
+    (#t (PRCWinPDiagonalNWHelper Board (+ Row 1) (- Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move south east diagonally.
-(define (PRCWinPDiagonalSEHelper board Row Col)
+(define (PRCWinPDiagonalSEHelper Board Row Col)
   (cond
-    ((null? board) #f)
+    ((null? Board) #f)
     ((< Row 4) #f)
     ((> Col 4) #f) ; If the row is less than 4 or the column is greater than 4, there are not enough cells above or to the right to win.
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 1) (+ Col 1))) (PRCNotZero? (PRCGetCell board (- Row 1) (+ Col 1))))
-          (and (= (PRCGetCell board (- Row 1) (+ Col 1)) (PRCGetCell board (- Row 2) (+ Col 2))) (PRCNotZero? (PRCGetCell board (- Row 2) (+ Col 2))))
-          (and (= (PRCGetCell board (- Row 2) (+ Col 2)) (PRCGetCell board (- Row 3) (+ Col 3))) (PRCNotZero? (PRCGetCell board (- Row 3) (+ Col 3)))))
+    ((and (and (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 1) (+ Col 1))) (PRCNotZero? (PRCGetCell Board (- Row 1) (+ Col 1))))
+          (and (= (PRCGetCell Board (- Row 1) (+ Col 1)) (PRCGetCell Board (- Row 2) (+ Col 2))) (PRCNotZero? (PRCGetCell Board (- Row 2) (+ Col 2))))
+          (and (= (PRCGetCell Board (- Row 2) (+ Col 2)) (PRCGetCell Board (- Row 3) (+ Col 3))) (PRCNotZero? (PRCGetCell Board (- Row 3) (+ Col 3)))))
      #t)
-    (#t (PRCWinPDiagonalSEHelper board (- Row 1) (+ Col 1)))))
+    (#t (PRCWinPDiagonalSEHelper Board (- Row 1) (+ Col 1)))))
 
 ; This function takes the most recent move and tests to see
 ; if it is a winning move south west diagonally.
-(define (PRCWinPDiagonalSWHelper board Row Col)
+(define (PRCWinPDiagonalSWHelper Board Row Col)
   (cond
-    ((null? board) #f)
+    ((null? Board) #f)
     ((< Row 4) #f)
     ((< Col 4) #f) ; If the row is less than 4 or the column is less than 4, there are not enough cells above or to the left to win.
-    ((and (and (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 1) (- Col 1))) (PRCNotZero? (PRCGetCell board (- Row 1) (- Col 1))))
-          (and (= (PRCGetCell board (- Row 1) (- Col 1)) (PRCGetCell board (- Row 2) (- Col 2))) (PRCNotZero? (PRCGetCell board (- Row 2) (- Col 2))))
-          (and (= (PRCGetCell board (- Row 2) (- Col 2)) (PRCGetCell board (- Row 3) (- Col 3))) (PRCNotZero? (PRCGetCell board (- Row 3) (- Col 3)))))
+    ((and (and (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 1) (- Col 1))) (PRCNotZero? (PRCGetCell Board (- Row 1) (- Col 1))))
+          (and (= (PRCGetCell Board (- Row 1) (- Col 1)) (PRCGetCell Board (- Row 2) (- Col 2))) (PRCNotZero? (PRCGetCell Board (- Row 2) (- Col 2))))
+          (and (= (PRCGetCell Board (- Row 2) (- Col 2)) (PRCGetCell Board (- Row 3) (- Col 3))) (PRCNotZero? (PRCGetCell Board (- Row 3) (- Col 3)))))
      #t)
-    (#t (PRCWinPDiagonalSWHelper board (- Row 1) (- Col 1)))))
+    (#t (PRCWinPDiagonalSWHelper Board (- Row 1) (- Col 1)))))
 
 ; This function takes a board and tests to see if the next player's
 ; token will win the game if placed in the specified column.
-(define (PRCWillWinPHelper board Col)
-  (cond ((PRCWinPRow board (PRCGetTopRow board Col) Col) #t)
-        ((PRCWinPCol board (PRCGetTopRow board Col) Col) #t)
-        ((PRCWinPDiagonal board (PRCGetTopRow board Col) Col) #t)
+(define (PRCWillWinPHelper Board Col)
+  (cond ((PRCWinPRow Board (PRCGetTopRow Board Col) Col) #t)
+        ((PRCWinPCol Board (PRCGetTopRow Board Col) Col) #t)
+        ((PRCWinPDiagonal Board (PRCGetTopRow Board Col) Col) #t)
         (#t #f)))
 
 ; This function checks for the edge case of a winning move being between
 ; two tokens on its right and one token on its left in the north east direction.
-(define (PRCWinPDiagonalNEEdgeCase board Row Col)
+(define (PRCWinPDiagonalNEEdgeCase Board Row Col)
   (and (>= Row 2) (<= Row 4) (>= Col 2) (<= Col 5)
-       (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 1) (- Col 1)))
-       (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) (+ Col 1)))
-       (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 2) (+ Col 2)))
-       (PRCNotZero? (PRCGetCell board Row Col))))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 1) (- Col 1)))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (+ Row 1) (+ Col 1)))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (+ Row 2) (+ Col 2)))
+       (PRCNotZero? (PRCGetCell Board Row Col))))
 
 ; This function checks for the edge case of a winning move being between
 ; two tokens on its right and one token on its left in the north west direction.
-(define (PRCWinPDiagonalNWEdgeCase board Row Col)
+(define (PRCWinPDiagonalNWEdgeCase Board Row Col)
   (and (>= Row 2) (<= Row 4) (>= Col 3) (<= Col 6)
-       (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 1) (+ Col 1)))
-       (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) (- Col 1)))
-       (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 2) (- Col 2)))
-       (PRCNotZero? (PRCGetCell board Row Col))))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 1) (+ Col 1)))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (+ Row 1) (- Col 1)))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (+ Row 2) (- Col 2)))
+       (PRCNotZero? (PRCGetCell Board Row Col))))
 
 ; This function checks for the edge case of a winning move being between
 ; two tokens on its right and one token on its left in the south east direction.
-(define (PRCWinPDiagonalSEEdgeCase board Row Col)
+(define (PRCWinPDiagonalSEEdgeCase Board Row Col)
   (and (>= Row 3) (<= Row 5) (>= Col 2) (<= Col 5)
-       (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) (- Col 1)))
-       (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 1) (+ Col 1)))
-       (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 2) (+ Col 2)))
-       (PRCNotZero? (PRCGetCell board Row Col))))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (+ Row 1) (- Col 1)))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 1) (+ Col 1)))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 2) (+ Col 2)))
+       (PRCNotZero? (PRCGetCell Board Row Col))))
 
 ; This function checks for the edge case of a winning move being between two
 ; tokens on its right and one token on its left in the south west direction.
-(define (PRCWinPDiagonalSWEdgeCase board Row Col)
+(define (PRCWinPDiagonalSWEdgeCase Board Row Col)
   (and (>= Row 3) (<= Row 5) (>= Col 3) (<= Col 6)
-       (= (PRCGetCell board Row Col) (PRCGetCell board (+ Row 1) (+ Col 1)))
-       (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 1) (- Col 1)))
-       (= (PRCGetCell board Row Col) (PRCGetCell board (- Row 2) (- Col 2)))
-       (PRCNotZero? (PRCGetCell board Row Col))))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (+ Row 1) (+ Col 1)))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 1) (- Col 1)))
+       (= (PRCGetCell Board Row Col) (PRCGetCell Board (- Row 2) (- Col 2)))
+       (PRCNotZero? (PRCGetCell Board Row Col))))
 
-; These functions combine the edge case functions with the helper functions.
-(define (PRCWinPDiagonalNE board Row Col)
-  (or (PRCWinPDiagonalNEHelper board Row Col)
-      (PRCWinPDiagonalNEEdgeCase board Row Col)))
+; The four functions below combine the diagonal edge case functions with the helper functions.
+(define (PRCWinPDiagonalNE Board Row Col)
+  (or (PRCWinPDiagonalNEHelper Board Row Col)
+      (PRCWinPDiagonalNEEdgeCase Board Row Col)))
 
-(define (PRCWinPDiagonalNW board Row Col)
-  (or (PRCWinPDiagonalNWHelper board Row Col)
-      (PRCWinPDiagonalNWEdgeCase board Row Col)))
+(define (PRCWinPDiagonalNW Board Row Col)
+  (or (PRCWinPDiagonalNWHelper Board Row Col)
+      (PRCWinPDiagonalNWEdgeCase Board Row Col)))
 
-(define (PRCWinPDiagonalSE board Row Col)
-  (or (PRCWinPDiagonalSEHelper board Row Col)
-      (PRCWinPDiagonalSEEdgeCase board Row Col)))
+(define (PRCWinPDiagonalSE Board Row Col)
+  (or (PRCWinPDiagonalSEHelper Board Row Col)
+      (PRCWinPDiagonalSEEdgeCase Board Row Col)))
 
-(define (PRCWinPDiagonalSW board Row Col)
-  (or (PRCWinPDiagonalSWHelper board Row Col)
-      (PRCWinPDiagonalSWEdgeCase board Row Col)))
+(define (PRCWinPDiagonalSW Board Row Col)
+  (or (PRCWinPDiagonalSWHelper Board Row Col)
+      (PRCWinPDiagonalSWEdgeCase Board Row Col)))
 
 ; This function combines the diagonal functions.
-(define (PRCWinPDiagonal board Row Col)
-  (or (PRCWinPDiagonalNE board Row Col)
-      (PRCWinPDiagonalNW board Row Col)
-      (PRCWinPDiagonalSE board Row Col)
-      (PRCWinPDiagonalSW board Row Col)))
+(define (PRCWinPDiagonal Board Row Col)
+  (or (PRCWinPDiagonalNE Board Row Col)
+      (PRCWinPDiagonalNW Board Row Col)
+      (PRCWinPDiagonalSE Board Row Col)
+      (PRCWinPDiagonalSW Board Row Col)))
 
 ; ------------------  MAIN FUNCTIONS  ------------------
 
@@ -359,17 +359,13 @@
 ; This function takes a column number (numbered left to right from 1 to 7) as input
 ; and uses this input to update the global PRCGame variable.
 (define (PRCMarkMove Col)
-  (if (PRCLegalMoveP Col)
-      (begin
-         (set! PRCGame
-               (cons (PRCNextPlayer)
-                     (PRCMove (cdr PRCGame)
-                              (car PRCGame)
-                               Col)))
-         Col)
-      (begin
-        (display "Illegal move. Try again.") (newline)
-        #f)))
+  (begin
+    (set! PRCGame
+          (cons (PRCNextPlayer)
+                (PRCMove (cdr PRCGame)
+                        (car PRCGame)
+                          Col)))
+    Col))
 
 ; This function displays the current game grid and returns #t.
 (define (PRCShowGame)
