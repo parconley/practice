@@ -164,32 +164,38 @@ show_state(potion_crafting) :-
     write('(a) Mix ingredients in the correct order'), nl,
     write('(b) Mix ingredients in the wrong order'), nl,
     write('(q) Quit the program'), nl.
+
 show_state(correct_order) :-
     write('Success!'), nl,
     write('Do you want to...'), nl,
     write('(a) Measure and input the correct amounts for each ingredient'), nl,
     write('(b) Measure and input the wrong amounts for each ingredient'), nl,
     write('(q) Quit the program'), nl.
+
 show_state(incorrect_order) :-
     write('Failure!'), nl,
     write('Do you want to...'), nl,
     write('(a) Try mixing the ingredients again'), nl,
     write('(b) Measure and input the wrong amounts for each ingredient'), nl,
     write('(q) Quit the program'), nl.
+
 show_state(success) :-
     write('You successfully created the potion!'), nl,
     write('Do you want to...'), nl,
     write('(a) Proceed to the Positive Outcome'), nl,
     write('(q) Quit the program'), nl.
+
 show_state(failure) :-
     write('You failed to create the potion!'), nl,
     write('Do you want to...'), nl,
     write('(a) Proceed to the Negative Outcome'), nl,
     write('(q) Quit the program'), nl.
+
 show_state(positive_outcome) :-
     write('Congratulations! You successfully created the potion and saved the village elder.'), nl,
     write('Your alchemy skills have brought you fame and respect in the village.'), nl,
     write('Thank you for playing the Alchemist''s Lab quest!'), nl.
+
 show_state(negative_outcome) :-
     write('Unfortunately, you failed to create the potion in time, and the village elder has passed away.'), nl,
     write('You are devastated, but you vow to continue your studies and become a better alchemist.'), nl,
