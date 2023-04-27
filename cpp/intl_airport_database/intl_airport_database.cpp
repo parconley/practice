@@ -1,4 +1,4 @@
-// Nmae: Parker Conley
+// Name: Parker Conley
 // Date: 04.20.2023
 // Description: This program organizes and sorts a dataset
 // of international airports, then offers users the ability to search
@@ -6,46 +6,151 @@
 // Upon entering a valid code, users receive relevant airport information,
 // including name, total seats, country, and geographical coordinates.
 
-// Key Points:
-//
-// - Select a subject for data (e.g., states, chemical elements, movies)
-// - Create a data file with at least 20 records, each with at least 4 fields (1 key field, 2 numeric fields, 2 string fields)
-// - Program provides search capability for users to find records based on key field
-// - Use array of records, declare fixed size array (e.g., 100)
-// - Load data into array only once at beginning
-// - Sort data using selection or bubble sort
-// - Implement binary search for finding records
-// - No global variables allowed
-// - Use subprograms for loading data, sorting, and searching
-// - Turn in: Data description (topic, fields, data types) via email for comments
-// - Code submission: Include all phases in one version
-
 #include <iostream>
 using namespace std;
+#include <fstream>
 
 struct Airport {
-    string _orig; // XXX: CHANGE THIS TO A CHAR ARRAY
-    string _name; // XXX: CHANGE THIS TO A CHAR ARRAY
-    int _totalSeats;
-    string _country; // XXX: CHANGE THIS TO A CHAR ARRAY
-    double _lat;
-    double _long;
+    char _orig[4]; // Airport code
+    char _name[100]; // Airport name
+    double _totalSeats; // Total seats
+    char _country[50]; // Country
+    double _lat; // Latitude
+    double _long; // Longitude
 };
+
+void loadAirports(Airport airports[], int &nAirports);
+void sortAirports(Airport airports[], int nAirports);
+Airport searchAirports(Airport airports[], int nAirports, char key[]);
+int str_compare(char s1[], char s2[]);
+void str_copy(char dest[], char src[]);
 
 int main() {
     cout << "Welcome to the International Airport Database!" << endl;
     cout << "This program organizes and sorts a dataset of international airports," << endl;
     cout << "then offers users the ability to search for specific airport details" << endl;
     cout << "using the airport code." << endl << endl;
-    cout << "Please enter the name of the data file: ";
-    string fileName;
-    cin >> fileName;
-    cout << endl;
 
     // Load data into array
     Airport airports[100];
-    int numAirports = 0;
+    int nAirports = 0;
+    loadAirports(airports, nAirports);
 
+    // Sort data
+    sortAirports(airports, nAirports);
 
-    return 0;
+    // Search data
+    char key[4];
+    int stay = 1;
+
+    do {
+        cout << "Please enter an airport code: ";
+        cin >> key;
+
+        Airport foundAirport = searchAirports(airports, nAirports, key);
+        char notFoundOrig[4] = "NOT";
+
+        if (str_compare(foundAirport._orig, notFoundOrig) == 0) {
+            cout << endl;
+            cout << "Airport not found." << endl << endl;
+        } else {
+            cout << endl;
+            cout << "Airport found!" << endl << endl;
+            cout << "Airport name: " << foundAirport._name << endl;
+            cout << "Total seats: " << foundAirport._totalSeats << endl;
+            cout << "Country: " << foundAirport._country << endl;
+            cout << "Latitude: " << foundAirport._lat << endl;
+            cout << "Longitude: " << foundAirport._long << endl << endl;
+        }
+
+        cout << "Would you like to search for another airport? (1 = yes, 0 = no): ";
+        cin >> stay;
+        cout << endl;
+    } while (stay == 1);
+}
+
+// Load data into array
+void loadAirports(Airport airports[], int &nAirports) {
+    fstream infile;
+
+    infile.open("airports.txt", ios::in);
+
+    nAirports = 0;
+    char end[4] = "END";
+
+    infile >> airports[nAirports]._orig;
+    while (str_compare(airports[nAirports]._orig, end) != 0) {
+        infile >> airports[nAirports]._name;
+        infile >> airports[nAirports]._totalSeats;
+        infile >> airports[nAirports]._country;
+        infile >> airports[nAirports]._lat;
+        infile >> airports[nAirports]._long;
+
+        nAirports++;
+
+        infile >> airports[nAirports]._orig;
+    }
+
+    infile.close();
+}
+
+// Selection sort
+void sortAirports(Airport airports[], int nAirports) {
+    int i, j, minIndex;
+    Airport temp;
+
+    for (i = 0; i < nAirports - 1; i++) {
+        minIndex = i;
+        for (j = i + 1; j < nAirports; j++) {
+            if (str_compare(airports[j]._orig, airports[minIndex]._orig) < 0) {
+                minIndex = j;
+            }
+        }
+        temp = airports[i];
+        airports[i] = airports[minIndex];
+        airports[minIndex] = temp;
+    }
+}
+
+// Binary search
+Airport searchAirports(Airport airports[], int nAirports, char key[]) {
+    int low = 0;
+    int high = nAirports - 1;
+    int mid;
+
+    while (low <= high) {
+        mid = (low + high) / 2;
+        if (str_compare(airports[mid]._orig, key) < 0) {
+            low = mid + 1;
+        } else if (str_compare(airports[mid]._orig, key) > 0) {
+            high = mid - 1;
+        } else {
+            return airports[mid];
+        }
+    }
+
+    Airport notFound;
+    char notFoundOrig[4] = "NOT";
+
+    str_copy(notFound._orig, notFoundOrig);
+    return notFound;
+}
+
+// Compare two strings, return 0 if equal, < 0 if s1 < s2, > 0 if s1 > s2
+int str_compare(char s1[], char s2[]) {
+    int i = 0;
+    while (s1[i] != '\0' && s2[i] != '\0' && s1[i] == s2[i]) {
+        i++;
+    }
+    return s1[i] - s2[i];
+}
+
+// Copy string s2 to s1
+void str_copy(char dest[], char src[]) {
+    int i = 0;
+    while (src[i] != '\0') {
+        dest[i] = src[i];
+        i++;
+    }
+    dest[i] = '\0';
 }
