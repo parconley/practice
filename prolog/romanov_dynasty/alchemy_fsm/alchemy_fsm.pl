@@ -9,6 +9,7 @@
 start_state(exploration).
 
 % Define the edges of the finite state diagram
+% Exploration
 next_state(exploration, a, bookshelf).
 next_state(exploration, b, table).
 next_state(exploration, c, painting).
@@ -20,21 +21,26 @@ next_state(table, a, exploration).
 next_state(painting, a, exploration).
 next_state(recipe_found, a, ingredient_gathering).
 
+% Ingredient Gathering
 next_state(ingredient_gathering, a, cabinets).
 next_state(ingredient_gathering, b, under_table).
-next_state(ingredient_gathering, c, hidden_compartment).
+next_state(ingredient_gathering, c, chest).
 next_state(ingredient_gathering, d, optional_puzzle).
 
 next_state(cabinets, a, ingredient_gathering).
 next_state(cabinets, b, ingredient_a_found).
+
 next_state(under_table, a, ingredient_gathering).
-next_state(hidden_compartment, a, ingredient_gathering).
-next_state(hidden_compartment, b, ingredient_b_found).
+
+next_state(chest, a, ingredient_gathering).
+next_state(chest, b, ingredient_b_found).
+
 next_state(optional_puzzle, a, ingredient_gathering).
 next_state(optional_puzzle, b, sovle_puzzle).
 
+
 next_state(ingredient_a_found, a, potion_crafting).
-next_state(ingredient_a_found, b, ingredient_gathering)
+next_state(ingredient_a_found, b, ingredient_gathering).
 
 next_state(ingredient_b_found, a, potion_crafting).
 next_state(ingredient_b_found, b, ingredient_gathering).
@@ -42,6 +48,7 @@ next_state(ingredient_b_found, b, ingredient_gathering).
 next_state(ingredient_c_found, a, potion_crafting).
 next_state(ingredient_c_found, b, ingredient_gathering).
 
+% Potion Crafting
 next_state(potion_crafting, a, correct_order).
 next_state(potion_crafting, b, incorrect_order).
 next_state(correct_order, a, success).
@@ -62,8 +69,7 @@ display_intro :-
 initialize :-
     asserta(stored_answer(ingredient_a, no)),
     asserta(stored_answer(ingredient_b, no)),
-    asserta(stored_answer(ingredient_c, no)),
-    asserta(total_ingredients(0)).
+    asserta(stored_answer(ingredient_c, no)).
 
 % code to be executed at the end...
 goodbye :-
@@ -112,23 +118,25 @@ show_state(ingredient_gathering) :-
     write('Choose a location:'), nl,
     write('(a) Search the cabinets'), nl,
     write('(b) Look under the table'), nl,
-    write('(c) Check the hidden compartment in the bookshelf'), nl,
+    write('(c) Check the chest at the end of the bed'), nl,
     write('(d) Solve the optional puzzle to open the safe'), nl,
     write('(q) Quit the program'), nl.
 
 show_state(cabinets) :-
     write('Found ingredient A!'), nl,
     write('Do you want to...'), nl,
-    write('(a) Go back to Ingredient Gathering'), nl.
+    write('(a) Go back to Ingredient Gathering'), nl,
     write('(q) Quit the program'), nl.
 
 show_state(under_table) :-
     write('Just some dust.'), nl,
-    write('Go back to Ingredient Gathering...'), nl.
+    write('(a) Go back to Ingredient Gathering'), nl,
+    write('(q) Quit the program'), nl.
 
-show_state(hidden_compartment) :-
+show_state(chest) :-
     write('Found ingredient B!'), nl,
-    write('Go back to Ingredient Gathering...'), nl.
+    write('(a) Go back to Ingredient Gathering'), nl,
+    write('(q) Quit the program'), nl.
 
 show_state(optional_puzzle) :-
     write('You found a safe!'), nl,
@@ -136,19 +144,25 @@ show_state(optional_puzzle) :-
     write('(a) Go back to Ingredient Gathering'), nl,
     write('(b) Solve the optional puzzle'), nl,
     write('(q) Quit the program'), nl.
-    
+
+show_state(solve_puzzle) :-
+    write('What is 2 + 2?'), nl,
+    write('(Type your answer and press Enter)'), nl.
+
 show_state(ingredient_a_found) :-
     write('You found ingredient A! Proceed to Potion Crafting'), nl,
     write('Do you want to...'), nl,
     write('(a) Proceed to Potion Crafting'), nl,
     write('(b) Continue searching for ingredients'), nl,
     write('(q) Quit the program'), nl.
+
 show_state(ingredient_b_found) :-
     write('You found ingredient B! Proceed to Potion Crafting'), nl,
     write('Do you want to...'), nl,
     write('(a) Proceed to Potion Crafting'), nl,
     write('(b) Continue searching for ingredients'), nl,
     write('(q) Quit the program'), nl.
+
 show_state(ingredient_c_found) :-
     write('You found ingredient C! Proceed to Potion Crafting'), nl,
     write('Do you want to...'), nl,
@@ -230,7 +244,7 @@ show_transition(painting, a) :-
     write('You decide to go back to exploring.'), nl.
 
 show_transition(recipe_found, a) :-
-    write('You proceed to the Ingredient Gathering stage.'), nl,
+    write('You proceed to the Ingredient Gathering stage.'), nl.
 
 % Ingredient Gathering
 show_transition(ingredient_gathering, a) :-
@@ -240,22 +254,30 @@ show_transition(ingredient_gathering, b) :-
     write('You decide to look under the table.'), nl.
 
 show_transition(ingredient_gathering, c) :-
-    write('You decide to check the hidden compartment in the bookshelf.'), nl.
+    write('You decide to open the chest.'), nl.
 
 show_transition(ingredient_gathering, d) :-
     write('You decide to solve the optional puzzle to open the safe.'), nl.
 
 show_transition(cabinets, a) :-
-    write('You decide to go back to Ingredient Gathering.'), nl.
+    write('You decide to go back to Ingredient Gathering.'), nl,
+    retract(stored_ingredient(ingredient_a, no)),
+    asserta(stored_ingredient(ingredient_a, yes)).
 
 show_transition(under_table, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl.
 
-show_transition(hidden_compartment, a) :-
-    write('You decide to go back to Ingredient Gathering.'), nl.
+show_transition(chest, a) :-
+    write('You decide to go back to Ingredient Gathering.'), nl,
+    retract(stored_ingredient(ingredient_b, no)),
+    asserta(stored_ingredient(ingredient_b, yes)).
 
 show_transition(optional_puzzle, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl.
+
+% TODO: add transition for optional puzzle success
+
+
 
 show_transition(ingredient_a_found, a) :-
     write('You proceed to the Potion Crafting stage.'), nl.
@@ -269,20 +291,28 @@ show_transition(ingredient_c_found, a) :-
 % Potion Crafting
 show_transition(potion_crafting, a) :-
     write('You decide to mix the ingredients in the correct order.'), nl.
+
 show_transition(potion_crafting, b) :-
     write('You decide to mix the ingredients in the wrong order.'), nl.
+
 show_transition(correct_order, a) :-
     write('You measure and input the correct amounts for each ingredient.'), nl.
+
 show_transition(correct_order, b) :-
     write('You measure and input the wrong amounts for each ingredient.'), nl.
+
 show_transition(incorrect_order, a) :-
     write('You decide to try mixing the ingredients again.'), nl.
+
 show_transition(incorrect_order, b) :-
     write('You decide to measure and input the wrong amounts for each ingredient.'), nl.
+
 show_transition(success, a) :-
     write('You proceed to the Positive Outcome.'), nl.
+
 show_transition(failure, a) :-
     write('You proceed to the Negative Outcome.'), nl.
+
 show_transition(_, fail) :-
     write('Invalid choice. Please try again.'), nl.
 
@@ -325,7 +355,7 @@ go_to_next_state(S1,Cin) :-
 
 get_choice(_,C) :-
     write('Next entry (letter '),
-    write('followed by a period )? '),
+    write('followed by a period)? '),
     read(C).
 
 % case knowledge base - user responses
