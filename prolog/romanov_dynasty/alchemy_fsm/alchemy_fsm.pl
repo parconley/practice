@@ -25,18 +25,20 @@ next_state(recipe_found, a, ingredient_gathering).
 next_state(ingredient_gathering, a, cabinets).
 next_state(ingredient_gathering, b, under_table).
 next_state(ingredient_gathering, c, chest).
-next_state(ingredient_gathering, d, optional_puzzle).
+next_state(ingredient_gathering, d, puzzle).
 
 next_state(cabinets, a, ingredient_gathering).
-next_state(cabinets, b, ingredient_a_found).
-
 next_state(under_table, a, ingredient_gathering).
-
 next_state(chest, a, ingredient_gathering).
-next_state(chest, b, ingredient_b_found).
 
-next_state(optional_puzzle, a, ingredient_gathering).
-next_state(optional_puzzle, b, sovle_puzzle).
+
+next_state(puzzle, a, ingredient_gathering).
+next_state(puzzle, b, sovle_puzzle).
+next_state(check_puzzle_answer, a, safe).
+next_state(check_puzzle_answer, b, puzzle_failure).
+next_state(safe, a, ingredient_gathering).
+next_state(puzzle_failure, a, ingredient_gathering).
+
 
 
 next_state(ingredient_a_found, a, potion_crafting).
@@ -69,8 +71,11 @@ display_intro :-
 initialize :-
     asserta(stored_answer(ingredient_a, no)),
     asserta(stored_answer(ingredient_b, no)),
-    asserta(stored_answer(ingredient_c, no)).
-
+    asserta(stored_answer(ingredient_c, no)),
+    asserta(stored_answer(puzzle_1, 0)),
+    asserta(stored_answer(puzzle_2, 0)),
+    asserta(stored_answer(puzzle_3, 0)).
+    
 % code to be executed at the end...
 goodbye :-
     write('Thank you for playing. Goodbye!'), nl.
@@ -119,7 +124,7 @@ show_state(ingredient_gathering) :-
     write('(a) Search the cabinets'), nl,
     write('(b) Look under the table'), nl,
     write('(c) Check the chest at the end of the bed'), nl,
-    write('(d) Solve the optional puzzle to open the safe'), nl,
+    write('(d) Solve the puzzle to open the safe'), nl,
     write('(q) Quit the program'), nl.
 
 show_state(cabinets) :-
@@ -138,16 +143,47 @@ show_state(chest) :-
     write('(a) Go back to Ingredient Gathering'), nl,
     write('(q) Quit the program'), nl.
 
-show_state(optional_puzzle) :-
+show_state(puzzle) :-
     write('You found a safe!'), nl,
     write('Do you want to...'), nl,
     write('(a) Go back to Ingredient Gathering'), nl,
-    write('(b) Solve the optional puzzle'), nl,
+    write('(b) Solve the puzzle'), nl,
     write('(q) Quit the program'), nl.
 
 show_state(solve_puzzle) :-
-    write('What is 2 + 2?'), nl,
-    write('(Type your answer and press Enter)'), nl.
+    write('To solve the puzzle, enter three numbers that add up to 12.'), nl,
+    write('Enter the first number:'), nl,
+    read(Number1),
+    write('Enter the second number:'), nl,
+    read(Number2),
+    write('Enter the third number:'), nl,
+    read(Number3),
+    Total is Number1 + Number2 + Number3,
+    write('The total is '), write(Total), write('.'), nl,
+    (Total =:= 12 -> 
+        write('You opened the safe!'), nl,
+        write('Found ingredient C!'), nl,
+        write('(a) Go back to Ingredient Gathering'), nl,
+        write('(q) Quit the program'), nl;
+        write('Incorrect answer. Try again.'), nl,
+        write('(a) Go back to Ingredient Gathering'), nl,
+        write('(q) Quit the program'), nl).
+
+show_state(safe) :-
+    write('You opened the safe!'), nl,
+    write('Found ingredient C!'), nl,
+    write('(a) Go back to Ingredient Gathering'), nl,
+    write('(q) Quit the program'), nl.
+
+show_state(puzzle_failure) :-
+    write('Incorrect answer. Try again.'), nl,
+    write('(a) Go back to Ingredient Gathering'), nl,
+    write('(q) Quit the program'), nl.
+
+show_state(safe) :-
+    write('Found ingredient C!'), nl,
+    write('(a) Go back to Ingredient Gathering'), nl,
+    write('(q) Quit the program'), nl.
 
 show_state(ingredient_a_found) :-
     write('You found ingredient A! Proceed to Potion Crafting'), nl,
@@ -257,7 +293,29 @@ show_transition(ingredient_gathering, c) :-
     write('You decide to open the chest.'), nl.
 
 show_transition(ingredient_gathering, d) :-
-    write('You decide to solve the optional puzzle to open the safe.'), nl.
+    write('You decide to solve the puzzle to open the safe.'), nl.
+
+show_transition(puzzle, a) :-
+    write('You decide to go back to Ingredient Gathering.'), nl.
+
+show_transition(puzzle, b) :-
+    write('You decide to solve the puzzle to open the safe.'), nl.
+
+
+
+show_transition(check_puzzle_answer, a) :-
+    write('The answer is correct! You open the safe.'), nl.
+
+show_transition(check_puzzle_answer, b) :-
+    write('The answer is incorrect. The safe remains locked.'), nl.
+
+show_transition(safe, a) :-
+    write('You decide to go back to Ingredient Gathering.'), nl,
+    retract(stored_answer(ingredient_c, no)),
+    asserta(stored_answer(ingredient_c, yes)).
+
+show_transition(puzzle_failure, a) :-
+    write('You decide to go back to Ingredient Gathering.'), nl.
 
 show_transition(cabinets, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl,
@@ -271,13 +329,6 @@ show_transition(chest, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl,
     retract(stored_ingredient(ingredient_b, no)),
     asserta(stored_ingredient(ingredient_b, yes)).
-
-show_transition(optional_puzzle, a) :-
-    write('You decide to go back to Ingredient Gathering.'), nl.
-
-% TODO: add transition for optional puzzle success
-
-
 
 show_transition(ingredient_a_found, a) :-
     write('You proceed to the Potion Crafting stage.'), nl.
@@ -316,6 +367,35 @@ show_transition(failure, a) :-
 show_transition(_, fail) :-
     write('Invalid choice. Please try again.'), nl.
 
+% Puzzle answer checking
+
+process_puzzle_answer :-
+    stored_answer(puzzle_1, Num1),
+    stored_answer(puzzle_2, Num2),
+    stored_answer(puzzle_3, Num3),
+    Sum is Num1 + Num2 + Num3,
+    Sum =:= 12,
+    retract(stored_answer(puzzle_1, Num1)),
+    retract(stored_answer(puzzle_2, Num2)),
+    retract(stored_answer(puzzle_3, Num3)),
+    asserta(stored_answer(puzzle_1, 0)),
+    asserta(stored_answer(puzzle_2, 0)),
+    asserta(stored_answer(puzzle_3, 0)),
+    asserta(stored_answer(puzzle_answer, yes)).
+
+process_puzzle_answer :-
+    stored_answer(puzzle_1, Num1),
+    stored_answer(puzzle_2, Num2),
+    stored_answer(puzzle_3, Num3),
+    Sum is Num1 + Num2 + Num3,
+    Sum =\= 12,
+    retract(stored_answer(puzzle_1, Num1)),
+    retract(stored_answer(puzzle_2, Num2)),
+    retract(stored_answer(puzzle_3, Num3)),
+    asserta(stored_answer(puzzle_1, 0)),
+    asserta(stored_answer(puzzle_2, 0)),
+    asserta(stored_answer(puzzle_3, 0)),
+    asserta(stored_answer(puzzle_answer, no)).
 
 % basic finite state machine engine
 go :-
