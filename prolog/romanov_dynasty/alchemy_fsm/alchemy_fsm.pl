@@ -25,17 +25,27 @@ next_state(recipe_found, a, ingredient_gathering).
 next_state(ingredient_gathering, a, cabinets).
 next_state(ingredient_gathering, b, under_table).
 next_state(ingredient_gathering, c, chest).
-next_state(ingredient_gathering, d, puzzle).
+next_state(ingredient_gathering, d, locked_safe).
 
 next_state(cabinets, a, ingredient_gathering).
+next_state(cabinets, b, potion_crafting).
+
 next_state(under_table, a, ingredient_gathering).
+next_state(under_table, b, trap_door).
+next_state(under_table, c, paper).
+
+next_state(trap_door, a, ingredient_gathering).
+next_state(trap_door, b, hole).
+
+next_state(paper, a, ingredient_gathering).
+next_state(paper, b, potion_crafting).
+
 next_state(chest, a, ingredient_gathering).
 
+next_state(locked_safe, a, ingredient_gathering).
+next_state(locked_safe, b, sovle_puzzle).
 
-next_state(puzzle, a, ingredient_gathering).
-next_state(puzzle, b, sovle_puzzle).
-next_state(check_puzzle_answer, a, safe).
-next_state(check_puzzle_answer, b, puzzle_failure).
+
 next_state(safe, a, ingredient_gathering).
 next_state(puzzle_failure, a, ingredient_gathering).
 
@@ -69,12 +79,13 @@ display_intro :-
     write('and follow a recipe to create the potion.'), nl.
 
 initialize :-
+    asserta(stored_answer(gold_coin, 0)),
     asserta(stored_answer(ingredient_a, no)),
     asserta(stored_answer(ingredient_b, no)),
     asserta(stored_answer(ingredient_c, no)),
-    asserta(stored_answer(puzzle_1, 0)),
-    asserta(stored_answer(puzzle_2, 0)),
-    asserta(stored_answer(puzzle_3, 0)).
+    asserta(stored_answer(puzzle_1, no)),
+    asserta(stored_answer(puzzle_2, no)),
+    asserta(stored_answer(puzzle_3, no)).
     
 % code to be executed at the end...
 goodbye :-
@@ -106,7 +117,7 @@ show_state(table) :-
     write('(q) Quit the program'), nl.
 
 show_state(painting) :-
-    write('Nothing behind the painting.'), nl,
+    write('You found a gold coin behind the painting!'), nl,
     write('Do you want to...'), nl,
     write('(a) Go back to exploring'), nl,
     write('(q) Quit the program'), nl.
@@ -124,50 +135,101 @@ show_state(ingredient_gathering) :-
     write('(a) Search the cabinets'), nl,
     write('(b) Look under the table'), nl,
     write('(c) Check the chest at the end of the bed'), nl,
-    write('(d) Solve the puzzle to open the safe'), nl,
+    write('(d) Open the safe'), nl,
+    write('(e) Proceed to Potion Crafting'), nl,
     write('(q) Quit the program'), nl.
 
 show_state(cabinets) :-
     write('Found ingredient A!'), nl,
     write('Do you want to...'), nl,
     write('(a) Go back to Ingredient Gathering'), nl,
+    write('(b) Proceed to Potion Crafting'), nl,
     write('(q) Quit the program'), nl.
 
 show_state(under_table) :-
-    write('Just some dust.'), nl,
+    write('There is a trap door and a piece of paper.'), nl,
+    write('Do you want to...'), nl,
     write('(a) Go back to Ingredient Gathering'), nl,
+    write('(b) Open the trap door'), nl,
+    write('(c) Read the piece of paper'), nl,
     write('(q) Quit the program'), nl.
+
+show_state(trap_door) :-
+    write('Under the trap door is a deep deep hole. It smells like dead bodies.'), nl,
+    write('Do you want to...'), nl,
+    write('(a) Go back to Ingredient Gathering'), nl,
+    write('(b) Jump into the hole'), nl,
+    write('(q) Quit the program'), nl.
+
+show_state(paper) :-
+    write('The paper says:'), nl,
+    write('The first number is 2.'), nl,
+    write('The second number is 7.'), nl,
+    write('The third number is 4.'), nl,
+    write('Do you want to...'), nl,
+    write('(a) Go back to Ingredient Gathering'), nl,
+    write('(b) Proceed to Potion Crafting'), nl,
+    write('(q) Quit the program'), nl.
+
+show_state(hole) :-
+    write('You fell into the hole and died. RIP.'), nl,
+    write('Without your help, the village elder passed away.'), nl,
+    write('The village is now in ruins.'), nl,
+    write('Sucks to suck.'), nl.
 
 show_state(chest) :-
     write('Found ingredient B!'), nl,
-    write('(a) Go back to Ingredient Gathering'), nl,
-    write('(q) Quit the program'), nl.
-
-show_state(puzzle) :-
-    write('You found a safe!'), nl,
     write('Do you want to...'), nl,
     write('(a) Go back to Ingredient Gathering'), nl,
-    write('(b) Solve the puzzle'), nl,
+    write('(b) Proceed to Potion Crafting'), nl,
     write('(q) Quit the program'), nl.
 
-show_state(solve_puzzle) :-
-    write('To solve the puzzle, enter three numbers that add up to 12.'), nl,
-    write('Enter the first number:'), nl,
-    read(Number1),
-    write('Enter the second number:'), nl,
-    read(Number2),
-    write('Enter the third number:'), nl,
-    read(Number3),
-    Total is Number1 + Number2 + Number3,
-    write('The total is '), write(Total), write('.'), nl,
-    (Total =:= 12 -> 
-        write('You opened the safe!'), nl,
-        write('Found ingredient C!'), nl,
-        write('(a) Go back to Ingredient Gathering'), nl,
-        write('(q) Quit the program'), nl;
-        write('Incorrect answer. Try again.'), nl,
-        write('(a) Go back to Ingredient Gathering'), nl,
-        write('(q) Quit the program'), nl).
+show_state(locked_safe) :-
+    write('You found a safe! Unfortunately, it''s locked.'), nl,
+    write('Do you want to...'), nl,
+    write('(a) Go back to Ingredient Gathering'), nl,
+    write('(b) Unlock the safe.'), nl,
+    write('(q) Quit the program'), nl.
+
+show_state(lock_1) :-
+    write('The lock has three dials, each with the numbers 0-9.'), nl,
+    write('Choose a number for the first dial:'), nl,
+    write('(a) 0'), nl,
+    write('(b) 1'), nl,
+    write('(c) 2'), nl,
+    write('(d) 3'), nl,
+    write('(e) 4'), nl,
+    write('(f) 5'), nl,
+    write('(g) 6'), nl,
+    write('(h) 7'), nl,
+    write('(i) 8'), nl,
+    write('(j) 9'), nl.
+
+show_state(lock_2) :-
+    write('Choose a number for the second dial:'), nl,
+    write('(a) 0'), nl,
+    write('(b) 1'), nl,
+    write('(c) 2'), nl,
+    write('(d) 3'), nl,
+    write('(e) 4'), nl,
+    write('(f) 5'), nl,
+    write('(g) 6'), nl,
+    write('(h) 7'), nl,
+    write('(i) 8'), nl,
+    write('(j) 9'), nl.
+
+show_state(lock_3) :-
+    write('Choose a number for the third dial:'), nl,
+    write('(a) 0'), nl,
+    write('(b) 1'), nl,
+    write('(c) 2'), nl,
+    write('(d) 3'), nl,
+    write('(e) 4'), nl,
+    write('(f) 5'), nl,
+    write('(g) 6'), nl,
+    write('(h) 7'), nl,
+    write('(i) 8'), nl,
+    write('(j) 9'), nl.
 
 show_state(safe) :-
     write('You opened the safe!'), nl,
@@ -253,6 +315,7 @@ show_state(negative_outcome) :-
 
 % final states do not display a menu
 % - they automatically quit ('q')
+get_choice(hole, q).
 get_choice(positive_outcome, q).
 get_choice(negative_outcome, q).
 
@@ -266,6 +329,7 @@ show_transition(exploration, b) :-
 
 show_transition(exploration, c) :-
     write('You decide to look behind the painting.'), nl.
+    % TODO: Use code similar dragon 2 code treasure state here
 
 show_transition(bookshelf, a) :-
     write('You decide to go back to exploring.'), nl.
@@ -293,21 +357,13 @@ show_transition(ingredient_gathering, c) :-
     write('You decide to open the chest.'), nl.
 
 show_transition(ingredient_gathering, d) :-
-    write('You decide to solve the puzzle to open the safe.'), nl.
+    write('You decide to look at the safe.'), nl.
 
 show_transition(puzzle, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl.
 
 show_transition(puzzle, b) :-
     write('You decide to solve the puzzle to open the safe.'), nl.
-
-
-
-show_transition(check_puzzle_answer, a) :-
-    write('The answer is correct! You open the safe.'), nl.
-
-show_transition(check_puzzle_answer, b) :-
-    write('The answer is incorrect. The safe remains locked.'), nl.
 
 show_transition(safe, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl,
@@ -323,6 +379,21 @@ show_transition(cabinets, a) :-
     asserta(stored_ingredient(ingredient_a, yes)).
 
 show_transition(under_table, a) :-
+    write('You decide to go back to Ingredient Gathering.'), nl.
+
+show_transition(under_table, b) :-
+    write('You decide to open the trapdoor.'), nl.
+
+show_transition(under_table, c) :-
+    write('You decide to look at the paper.'), nl.
+
+show_transition(trap_door, a) :-
+    write('You decide to go back to Ingredient Gathering.'), nl.
+
+show_transition(trap_door, b) :-
+    write('You decide to jump down the trapdoor.'), nl.
+
+show_transition(paper, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl.
 
 show_transition(chest, a) :-
@@ -366,36 +437,6 @@ show_transition(failure, a) :-
 
 show_transition(_, fail) :-
     write('Invalid choice. Please try again.'), nl.
-
-% Puzzle answer checking
-
-process_puzzle_answer :-
-    stored_answer(puzzle_1, Num1),
-    stored_answer(puzzle_2, Num2),
-    stored_answer(puzzle_3, Num3),
-    Sum is Num1 + Num2 + Num3,
-    Sum =:= 12,
-    retract(stored_answer(puzzle_1, Num1)),
-    retract(stored_answer(puzzle_2, Num2)),
-    retract(stored_answer(puzzle_3, Num3)),
-    asserta(stored_answer(puzzle_1, 0)),
-    asserta(stored_answer(puzzle_2, 0)),
-    asserta(stored_answer(puzzle_3, 0)),
-    asserta(stored_answer(puzzle_answer, yes)).
-
-process_puzzle_answer :-
-    stored_answer(puzzle_1, Num1),
-    stored_answer(puzzle_2, Num2),
-    stored_answer(puzzle_3, Num3),
-    Sum is Num1 + Num2 + Num3,
-    Sum =\= 12,
-    retract(stored_answer(puzzle_1, Num1)),
-    retract(stored_answer(puzzle_2, Num2)),
-    retract(stored_answer(puzzle_3, Num3)),
-    asserta(stored_answer(puzzle_1, 0)),
-    asserta(stored_answer(puzzle_2, 0)),
-    asserta(stored_answer(puzzle_3, 0)),
-    asserta(stored_answer(puzzle_answer, no)).
 
 % basic finite state machine engine
 go :-
