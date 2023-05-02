@@ -5,6 +5,16 @@
 % The game is a quest to find the ingredients for a potion
 % and then to create the potion.
 
+% A paragraph or two describing what the user's task will be:
+% The user is a novice alchemist who has been tasked with creating
+% a potion to cure the village elder who has fallen gravely ill.
+% The user must explore the alchemist's lab to find a recipe and
+% three ingredients. Once the user has found the recipe and the
+% three ingredients, the user must follow the recipe to create
+% the potion. There are also two *GOLD COINS* hidden in the lab
+% that the user can find.
+
+
 % assign the state that will start the program
 start_state(exploration).
 
@@ -26,9 +36,9 @@ next_state(ingredient_gathering, a, cabinets).
 next_state(ingredient_gathering, b, under_table).
 next_state(ingredient_gathering, c, chest).
 next_state(ingredient_gathering, d, locked_safe).
+next_state(ingredient_gathering, e, potion_crafting).
 
 next_state(cabinets, a, ingredient_gathering).
-next_state(cabinets, b, potion_crafting).
 
 next_state(under_table, a, ingredient_gathering).
 next_state(under_table, b, trap_door).
@@ -38,7 +48,6 @@ next_state(trap_door, a, ingredient_gathering).
 next_state(trap_door, b, hole).
 
 next_state(paper, a, ingredient_gathering).
-next_state(paper, b, potion_crafting).
 
 next_state(chest, a, ingredient_gathering).
 
@@ -48,16 +57,9 @@ next_state(lock_1, _, lock_2).
 next_state(lock_2, _, lock_3).
 next_state(lock_3, _, ingredient_gathering).
 
-
 % Potion Crafting
-next_state(potion_crafting, a, correct_order).
-next_state(potion_crafting, b, incorrect_order).
-next_state(correct_order, a, success).
-next_state(correct_order, b, failure).
-next_state(incorrect_order, a, potion_crafting).
-next_state(incorrect_order, b, failure).
-next_state(success, a, positive_outcome).
-next_state(failure, a, negative_outcome).
+next_state(potion_crafting, a, end).
+next_state(potion_crafting, b, end).
 
 % Code to be executed at the beginning...
 display_intro :-
@@ -68,7 +70,9 @@ display_intro :-
     write('and follow a recipe to create the potion.'), nl.
 
 initialize :-
-    asserta(stored_answer(gold_coin, 0)),
+    asserta(stored_answer(gold_coins, 0)),
+    asserta(stored_answer(gold_coin_1, no)),
+    asserta(stored_answer(gold_coin_2, no)),
     asserta(stored_answer(ingredient_a, no)),
     asserta(stored_answer(ingredient_b, no)),
     asserta(stored_answer(ingredient_c, no)),
@@ -78,7 +82,11 @@ initialize :-
 
 % code to be executed at the end...
 goodbye :-
-    write('Thank you for playing. Goodbye!'), nl.
+    write('You have acumulated '),
+    stored_answer(gold_coins, Amount),
+    write(Amount),
+    write('/2 *GOLD COINS*. Nice.'), nl,  
+    write('Goodbye!'), nl.
 
 % Code to be executed upon reaching each state
 % Exploration
@@ -106,7 +114,7 @@ show_state(table) :-
     write('(q) Quit the program'), nl.
 
 show_state(painting) :-
-    write('You found a gold coin behind the painting!'), nl,
+    write('You found a *GOLD COIN* behind the painting!'), nl,
     write('Do you want to...'), nl,
     write('(a) Go back to exploring'), nl,
     write('(q) Quit the program'), nl.
@@ -132,7 +140,6 @@ show_state(cabinets) :-
     write('Found ingredient A!'), nl,
     write('Do you want to...'), nl,
     write('(a) Go back to Ingredient Gathering'), nl,
-    write('(b) Proceed to Potion Crafting'), nl,
     write('(q) Quit the program'), nl.
 
 show_state(under_table) :-
@@ -157,14 +164,12 @@ show_state(paper) :-
     write('The third number is 4.'), nl,
     write('Do you want to...'), nl,
     write('(a) Go back to Ingredient Gathering'), nl,
-    write('(b) Proceed to Potion Crafting'), nl,
     write('(q) Quit the program'), nl.
 
 show_state(chest) :-
-    write('Found ingredient B!'), nl,
+    write('Found ingredient B and a *GOLD COIN* in the chest!'), nl,
     write('Do you want to...'), nl,
     write('(a) Go back to Ingredient Gathering'), nl,
-    write('(b) Proceed to Potion Crafting'), nl,
     write('(q) Quit the program'), nl.
 
 show_state(locked_safe) :-
@@ -214,77 +219,17 @@ show_state(lock_3) :-
     write('(i) 8'), nl,
     write('(j) 9'), nl.
 
-show_state(safe) :-
-    write('You opened the safe!'), nl,
-    write('Found ingredient C!'), nl,
-    write('(a) Go back to Ingredient Gathering'), nl,
-    write('(q) Quit the program'), nl.
-
-show_state(puzzle_failure) :-
-    write('Incorrect answer. Try again.'), nl,
-    write('(a) Go back to Ingredient Gathering'), nl,
-    write('(q) Quit the program'), nl.
-
-show_state(safe) :-
-    write('Found ingredient C!'), nl,
-    write('(a) Go back to Ingredient Gathering'), nl,
-    write('(q) Quit the program'), nl.
-
-show_state(ingredient_a_found) :-
-    write('You found ingredient A! Proceed to Potion Crafting'), nl,
-    write('Do you want to...'), nl,
-    write('(a) Proceed to Potion Crafting'), nl,
-    write('(b) Continue searching for ingredients'), nl,
-    write('(q) Quit the program'), nl.
-
-show_state(ingredient_b_found) :-
-    write('You found ingredient B! Proceed to Potion Crafting'), nl,
-    write('Do you want to...'), nl,
-    write('(a) Proceed to Potion Crafting'), nl,
-    write('(b) Continue searching for ingredients'), nl,
-    write('(q) Quit the program'), nl.
-
-show_state(ingredient_c_found) :-
-    write('You found ingredient C! Proceed to Potion Crafting'), nl,
-    write('Do you want to...'), nl,
-    write('(a) Proceed to Potion Crafting'), nl,
-    write('(b) Continue searching for ingredients'), nl,
-    write('(q) Quit the program'), nl.
-
 % Potion Crafting
 show_state(potion_crafting) :-
-    write('Follow the recipe to create the potion.'), nl,
-    write('You need to mix the ingredients in the right order and measure the right amounts.'), nl,
+    write('To craft the potion, you need to mix the ingredients in the correct order.'), nl,
     write('Choose an action:'), nl,
     write('(a) Mix ingredients in the correct order'), nl,
     write('(b) Mix ingredients in the wrong order'), nl,
     write('(q) Quit the program'), nl.
 
-show_state(correct_order) :-
-    write('Success!'), nl,
-    write('Do you want to...'), nl,
-    write('(a) Measure and input the correct amounts for each ingredient'), nl,
-    write('(b) Measure and input the wrong amounts for each ingredient'), nl,
-    write('(q) Quit the program'), nl.
-
-show_state(incorrect_order) :-
-    write('Failure!'), nl,
-    write('Do you want to...'), nl,
-    write('(a) Try mixing the ingredients again'), nl,
-    write('(b) Measure and input the wrong amounts for each ingredient'), nl,
-    write('(q) Quit the program'), nl.
-
-show_state(success) :-
-    write('You successfully created the potion!'), nl,
-    write('Do you want to...'), nl,
-    write('(a) Proceed to the Positive Outcome'), nl,
-    write('(q) Quit the program'), nl.
-
-show_state(failure) :-
-    write('You failed to create the potion!'), nl,
-    write('Do you want to...'), nl,
-    write('(a) Proceed to the Negative Outcome'), nl,
-    write('(q) Quit the program'), nl.
+show_state(end) :-
+    write('Choose an action:'), nl,
+    write('(q) Receive final score'), nl.
 
 % final states do not display a menu
 % - they automatically quit ('q')
@@ -292,7 +237,8 @@ show_state(hole) :-
     write('You fell into the hole and died. RIP.'), nl,
     write('Without your help, the village elder passed away.'), nl,
     write('The village is now in ruins.'), nl,
-    write('Sucks to suck.'), nl.
+    write('Sucks to suck.'), nl,
+    write('Thank you for playing the Alchemist''s Lab quest!'), nl.
 
 show_state(positive_outcome) :-
     write('Congratulations! You successfully created the potion and saved the village elder.'), nl,
@@ -300,7 +246,7 @@ show_state(positive_outcome) :-
     write('Thank you for playing the Alchemist''s Lab quest!'), nl.
 
 show_state(negative_outcome) :-
-    write('Unfortunately, you failed to create the potion in time, and the village elder has passed away.'), nl,
+    write('Unfortunately, you failed to create the potion, and the village elder has passed away.'), nl,
     write('You are devastated, but you vow to continue your studies and become a better alchemist.'), nl,
     write('Thank you for playing the Alchemist''s Lab quest!'), nl.
 
@@ -317,6 +263,17 @@ show_transition(exploration, b) :-
     write('You decide to examine the table.'), nl.
 
 show_transition(exploration, c) :-
+    stored_answer(gold_coin_1, no),
+    stored_answer(gold_coins, Amount),
+    NewAmount is Amount + 1,
+    retract(stored_answer(gold_coins, _)),
+    asserta(stored_answer(gold_coins, NewAmount)),
+    retract(stored_answer(gold_coin_1, no)),
+    asserta(stored_answer(gold_coin_1, yes)),
+    write('You decide to look behind the painting.'), nl.
+
+show_transition(exploration, c) :-
+    stored_answer(gold_coin_1, yes),
     write('You decide to look behind the painting.'), nl.
 
 show_transition(bookshelf, a) :-
@@ -336,29 +293,54 @@ show_transition(recipe_found, a) :-
 
 % Ingredient Gathering
 show_transition(ingredient_gathering, a) :-
+    retract(stored_answer(ingredient_a, _)),
+    asserta(stored_answer(ingredient_a, yes)),
     write('You decide to search the cabinets.'), nl.
 
 show_transition(ingredient_gathering, b) :-
     write('You decide to look under the table.'), nl.
 
 show_transition(ingredient_gathering, c) :-
+    stored_answer(gold_coin_2, no),
+    stored_answer(gold_coins, Amount),
+    NewAmount is Amount + 1,
+    retract(stored_answer(gold_coins, _)),
+    asserta(stored_answer(gold_coins, NewAmount)),
+    retract(stored_answer(gold_coin_2, no)),
+    asserta(stored_answer(gold_coin_2, yes)),
+    retract(stored_answer(ingredient_b, _)),
+    asserta(stored_answer(ingredient_b, yes)),
+    write('You decide to open the chest.'), nl.
+
+show_transition(ingredient_gathering, c) :-
+    stored_answer(gold_coin_2, yes),
+    retract(stored_answer(ingredient_b, _)),
+    asserta(stored_answer(ingredient_b, yes)),
     write('You decide to open the chest.'), nl.
 
 show_transition(ingredient_gathering, d) :-
-    write('You decide to look at the safe.'), nl.
+    write('You decide to look at the safe.'), nl,
+    retract(stored_answer(lock_answer_1, _)),
+    asserta(stored_answer(lock_answer_1, no)),
+    retract(stored_answer(lock_answer_2, _)),
+    asserta(stored_answer(lock_answer_2, no)),
+    retract(stored_answer(lock_answer_3, _)),
+    asserta(stored_answer(lock_answer_3, no)).
 
 show_transition(ingredient_gathering, e) :-
+    stored_answer(ingredient_a, yes),
+    stored_answer(ingredient_b, yes),
+    stored_answer(ingredient_c, yes),
     write('You decide to procede to Potion Crafting.'), nl.
 
-show_transition(safe, a) :-
-    write('You decide to go back to Ingredient Gathering.'), nl,
-    retract(stored_answer(ingredient_c, no)),
-    asserta(stored_answer(ingredient_c, yes)).
+show_transition(ingredient_gathering, e) :-
+    (stored_answer(ingredient_a, no); stored_answer(ingredient_b, no); stored_answer(ingredient_c, no)),
+    write('Unfortunately, you are missing some ingredients!'), nl,
+    write('You decide to procede to Potion Crafting anyway.'), nl,
+    write('There''s no going back now.'), nl.
 
 show_transition(cabinets, a) :-
-    write('You decide to go back to Ingredient Gathering.'), nl,
-    retract(stored_ingredient(ingredient_a, no)),
-    asserta(stored_ingredient(ingredient_a, yes)).
+    write('You decide to go back to Ingredient Gathering.'), nl.
 
 show_transition(under_table, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl.
@@ -380,20 +362,14 @@ show_transition(paper, a) :-
 
 show_transition(chest, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl,
-    retract(stored_ingredient(ingredient_b, no)),
-    asserta(stored_ingredient(ingredient_b, yes)).
+    retract(stored_answer(ingredient_b, _)),
+    asserta(stored_answer(ingredient_b, yes)).
 
 show_transition(locked_safe, a) :-
     write('You decide to go back to Ingredient Gathering.'), nl.
 
 show_transition(locked_safe, b) :-
-    write('You decide to try to open the safe.'), nl,
-    retract(stored_answer(safe_answer_1, _)),
-    asserta(stored_answer(safe_answer_1, no)),
-    retract(stored_answer(safe_answer_2, _)),
-    asserta(stored_answer(safe_answer_2, no)),
-    retract(stored_answer(safe_answer_3, _)),
-    asserta(stored_answer(safe_answer_3, no)).
+    write('You decide to try to open the safe.'), nl.
 
 show_transition(lock_1, c) :-
     write('You enter the first number correctly.'), nl,
@@ -401,6 +377,7 @@ show_transition(lock_1, c) :-
     asserta(stored_answer(lock_answer_1, yes)).
 
 show_transition(lock_1, _) :-
+    stored_answer(lock_answer_1, no),
     write('You enter the first number incorrectly.'), nl.
 
 show_transition(lock_2, h) :-
@@ -409,6 +386,7 @@ show_transition(lock_2, h) :-
     asserta(stored_answer(lock_answer_2, yes)).
 
 show_transition(lock_2, _) :-
+    stored_answer(lock_answer_2, no),
     write('You enter the second number incorrectly.'), nl.
 
 show_transition(lock_3, e) :-
@@ -417,8 +395,8 @@ show_transition(lock_3, e) :-
     write('You entered all three numbers correctly!'), nl,
     write('You open the safe and find ingredient C!'), nl,
     write('You return to Ingredient Gathering.'), nl,
-    retract(stored_ingredient(ingredient_c, no)),
-    asserta(stored_ingredient(ingredient_c, yes)),
+    retract(stored_answer(ingredient_c, _)),
+    asserta(stored_answer(ingredient_c, yes)),
     retract(stored_answer(lock_answer_3, no)),
     asserta(stored_answer(lock_answer_3, yes)).
 
@@ -438,28 +416,21 @@ show_transition(lock_3, _) :-
 
 % Potion Crafting
 show_transition(potion_crafting, a) :-
-    write('You decide to mix the ingredients in the correct order.'), nl.
+    stored_answer(ingredient_a, yes),
+    stored_answer(ingredient_b, yes),
+    stored_answer(ingredient_c, yes),
+    write('You decide to mix the ingredients in the correct order.'), nl,
+    show_state(positive_outcome).
+
+show_transition(potion_crafting, a) :-
+    (stored_answer(ingredient_a, no); stored_answer(ingredient_b, no); stored_answer(ingredient_c, no)),
+    write('You decide to mix the ingredients in the correct order.'), nl,
+    write('You are missing some ingredients!'), nl,
+    show_state(negative_outcome).
 
 show_transition(potion_crafting, b) :-
-    write('You decide to mix the ingredients in the wrong order.'), nl.
-
-show_transition(correct_order, a) :-
-    write('You measure and input the correct amounts for each ingredient.'), nl.
-
-show_transition(correct_order, b) :-
-    write('You measure and input the wrong amounts for each ingredient.'), nl.
-
-show_transition(incorrect_order, a) :-
-    write('You decide to try mixing the ingredients again.'), nl.
-
-show_transition(incorrect_order, b) :-
-    write('You decide to measure and input the wrong amounts for each ingredient.'), nl.
-
-show_transition(success, a) :-
-    write('You proceed to the Positive Outcome.'), nl.
-
-show_transition(failure, a) :-
-    write('You proceed to the Negative Outcome.'), nl.
+    write('You decide to mix the ingredients in the wrong order.'), nl,
+    show_state(negative_outcome).
 
 show_transition(_, fail) :-
     write('Invalid choice. Please try again.'), nl.
@@ -477,7 +448,8 @@ intro :-
     clear_stored_answers,
     initialize,
     asserta(stored_answer(moves,0)).
-    go_to_next_state(_,q) :-
+
+go_to_next_state(_,q) :-
     stored_answer(moves,Count),
     write( 'You made this many moves...' ),
     write( Count ), nl,
