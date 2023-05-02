@@ -5,16 +5,6 @@
 % The game is a quest to find the ingredients for a potion
 % and then to create the potion.
 
-% A paragraph or two describing what the user's task will be:
-% The user is a novice alchemist who has been tasked with creating
-% a potion to cure the village elder who has fallen gravely ill.
-% The user must explore the alchemist's lab to find a recipe and
-% three ingredients. Once the user has found the recipe and the
-% three ingredients, the user must follow the recipe to create
-% the potion. There are also two *GOLD COINS* hidden in the lab
-% that the user can find.
-
-
 % assign the state that will start the program
 start_state(exploration).
 
@@ -28,7 +18,9 @@ next_state(bookshelf, a, exploration).
 next_state(bookshelf, b, recipe_found).
 
 next_state(table, a, exploration).
+
 next_state(painting, a, exploration).
+
 next_state(recipe_found, a, ingredient_gathering).
 
 % Ingredient Gathering
