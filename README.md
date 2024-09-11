@@ -1,3 +1,3 @@
 # practice
 
-https://youtu.be/eGDBR2L5kzI
+This repo contains 15+ practice projects in C++, Scheme, and Prolog.
