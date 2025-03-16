@@ -1,3 +1,3 @@
 # Practice Projects
 
-This repo contains 15+ practice projects in C++, Scheme, and Prolog.
+This repo contains practice projects in C++, Scheme, and Prolog.
